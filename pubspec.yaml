@@ -25,6 +25,7 @@ dependencies:
   grid_background: ^0.0.1
   url_launcher: ^6.3.2
   blur: ^4.0.2
+  flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
   flutter_test:

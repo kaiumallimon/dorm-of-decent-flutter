@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class LoginResponse extends Equatable{
+class LoginResponse extends Equatable {
   final bool success;
   final String accessToken;
   final String refreshToken;
@@ -17,21 +17,23 @@ class LoginResponse extends Equatable{
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
-      success: json['success'],
-      accessToken: json['accessToken'],
-      refreshToken: json['refreshToken'],
-      expiresIn: DateTime.parse(json['expiresIn']),
-      userData: UserData.fromJson(json['userData']),
+      success: json['success'] ?? false,
+      accessToken: json['access_token'],
+      refreshToken: json['refresh_token'],
+      // Convert Unix timestamp to DateTime
+      expiresIn: DateTime.fromMillisecondsSinceEpoch(
+          (json['expires_at'] * 1000).toInt()),
+      userData: UserData.fromJson(json['user']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'success': success,
-      'accessToken': accessToken,
-      'refreshToken': refreshToken,
-      'expiresIn': expiresIn.toIso8601String(),
-      'userData': userData.toJson(),
+      'access_token': accessToken,
+      'refresh_token': refreshToken,
+      'expires_at': expiresIn.millisecondsSinceEpoch ~/ 1000,
+      'user': userData.toJson(),
     };
   }
 
@@ -72,5 +74,4 @@ class UserData extends Equatable {
 
   @override
   List<Object?> get props => [id, email, name, role];
-} 
-
+}
