@@ -30,7 +30,7 @@ class ApiClient {
         onRequest: (options, handler) async {
           // Attach access token if available
           if (_accessToken == null) {
-            await _loadTokensFromStorage();
+            await loadTokensFromStorage();
           }
           if (_accessToken != null) {
             options.headers['Authorization'] = 'Bearer $_accessToken';
