@@ -1,6 +1,5 @@
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/logic/dashboard_cubit.dart';
-import 'package:dorm_of_decents/ui/widgets/custom_page_header.dart';
 import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,191 +14,184 @@ class DashboardPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomPageHeader(theme: theme, title: 'Dashboard'),
-            Expanded(
-              child: BlocConsumer<DashboardCubit, DashboardState>(
-                listener: (context, state) {},
-                builder: (context, state) {
-                  if (state is DashboardInitial) {
-                    context.read<DashboardCubit>().fetchDashboardData();
-                    return const MealsPageShimmer();
-                  } else if (state is DashboardLoading) {
-                    return const MealsPageShimmer();
-                  } else if (state is DashboardError) {
-                    return Center(child: Text(state.message));
-                  } else if (state is DashboardEmpty) {
-                    return Center(child: Text(state.message));
-                  } else if (state is DashboardLoaded) {
-                    final data = state.dashboardResponse;
+        child: BlocConsumer<DashboardCubit, DashboardState>(
+          listener: (context, state) {},
+          builder: (context, state) {
+            if (state is DashboardInitial) {
+              context.read<DashboardCubit>().fetchDashboardData();
+              return const MealsPageShimmer();
+            } else if (state is DashboardLoading) {
+              return const MealsPageShimmer();
+            } else if (state is DashboardError) {
+              return Center(child: Text(state.message));
+            } else if (state is DashboardEmpty) {
+              return Center(child: Text(state.message));
+            } else if (state is DashboardLoaded) {
+              final data = state.dashboardResponse;
 
-                    return RefreshIndicator(
-                      onRefresh: () async {
-                        await context
-                            .read<DashboardCubit>()
-                            .refreshDashboardData();
-                      },
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 10,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Meal Rate Card
-                            _buildMetricCard(
-                              context,
-                              theme,
-                              'Meal Rate',
-                              'BDT ${data.mealRate.toStringAsFixed(2)}',
-                              'Per meal cost',
-                              Icons.restaurant,
-                            ),
-                            const SizedBox(height: 12),
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await context.read<DashboardCubit>().refreshDashboardData();
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 10,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          // Meal Rate Card
+                          _buildMetricCard(
+                            context,
+                            theme,
+                            'Meal Rate',
+                            'BDT ${data.mealRate.toStringAsFixed(2)}',
+                            'Per meal cost',
+                            Icons.restaurant,
+                          ),
+                          const SizedBox(height: 12),
 
-                            // Total Meals Card
-                            _buildMetricCard(
-                              context,
-                              theme,
-                              'Total Meals',
-                              data.totalMeals.toStringAsFixed(1),
-                              '${data.dailyExpenseAverage.toStringAsFixed(1)} meals/day',
-                              Icons.dinner_dining,
-                            ),
-                            const SizedBox(height: 12),
+                          // Total Meals Card
+                          _buildMetricCard(
+                            context,
+                            theme,
+                            'Total Meals',
+                            data.totalMeals.toStringAsFixed(1),
+                            '${data.dailyExpenseAverage.toStringAsFixed(1)} meals/day',
+                            Icons.dinner_dining,
+                          ),
+                          const SizedBox(height: 12),
 
-                            // Total Expenses Card
-                            _buildMetricCard(
-                              context,
-                              theme,
-                              'Total Expenses',
-                              'BDT ${data.totalExpenses.toStringAsFixed(2)}',
-                              'BDT ${data.dailyExpenseAverage.toStringAsFixed(2)}/day',
-                              Icons.attach_money,
-                            ),
-                            const SizedBox(height: 12),
+                          // Total Expenses Card
+                          _buildMetricCard(
+                            context,
+                            theme,
+                            'Total Expenses',
+                            'BDT ${data.totalExpenses.toStringAsFixed(2)}',
+                            'BDT ${data.dailyExpenseAverage.toStringAsFixed(2)}/day',
+                            Icons.attach_money,
+                          ),
+                          const SizedBox(height: 12),
 
-                            // Weekly Trend Card
-                            _buildMetricCard(
-                              context,
-                              theme,
-                              'Weekly Trend',
-                              '${data.weeklyTrend.toStringAsFixed(1)}%',
-                              'Last 7 days vs previous',
-                              data.weeklyTrend >= 0
-                                  ? Icons.trending_up
-                                  : Icons.trending_down,
-                              valueColor: data.weeklyTrend >= 0
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                            const SizedBox(height: 12),
+                          // Weekly Trend Card
+                          _buildMetricCard(
+                            context,
+                            theme,
+                            'Weekly Trend',
+                            '${data.weeklyTrend.toStringAsFixed(1)}%',
+                            'Last 7 days vs previous',
+                            data.weeklyTrend >= 0
+                                ? Icons.trending_up
+                                : Icons.trending_down,
+                            valueColor: data.weeklyTrend >= 0
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                          const SizedBox(height: 12),
 
-                            // Days Active Card
-                            _buildMetricCard(
-                              context,
-                              theme,
-                              'Days Active',
-                              data.daysActive.toString(),
-                              '${data.memberCount} active members',
-                              Icons.calendar_today,
-                            ),
-                            const SizedBox(height: 12),
+                          // Days Active Card
+                          _buildMetricCard(
+                            context,
+                            theme,
+                            'Days Active',
+                            data.daysActive.toString(),
+                            '${data.memberCount} active members',
+                            Icons.calendar_today,
+                          ),
+                          const SizedBox(height: 12),
 
-                            // Avg per Person Card
-                            _buildSmallMetricCard(
-                              context,
-                              theme,
-                              'Avg per Person',
-                              data.avgMealsPerPerson.toStringAsFixed(1),
-                              'Meals per member',
-                              Icons.person,
-                            ),
-                            const SizedBox(height: 12),
+                          // Avg per Person Card
+                          _buildSmallMetricCard(
+                            context,
+                            theme,
+                            'Avg per Person',
+                            data.avgMealsPerPerson.toStringAsFixed(1),
+                            'Meals per member',
+                            Icons.person,
+                          ),
+                          const SizedBox(height: 12),
 
-                            // Food Budget Card
-                            _buildSmallMetricCard(
-                              context,
-                              theme,
-                              'Food Budget',
-                              '${((data.totalExpenses / data.totalExpenses) * 100).toStringAsFixed(1)}%',
-                              'BDT ${data.totalExpenses.toStringAsFixed(2)} of total',
-                              Icons.pie_chart,
-                            ),
-                            const SizedBox(height: 12),
+                          // Food Budget Card
+                          _buildSmallMetricCard(
+                            context,
+                            theme,
+                            'Food Budget',
+                            '${((data.totalExpenses / data.totalExpenses) * 100).toStringAsFixed(1)}%',
+                            'BDT ${data.totalExpenses.toStringAsFixed(2)} of total',
+                            Icons.pie_chart,
+                          ),
+                          const SizedBox(height: 12),
 
-                            // Total Transactions Card
-                            _buildSmallMetricCard(
-                              context,
-                              theme,
-                              'Total Transactions',
-                              data.totalTransactions.toString(),
-                              '${data.expensesPerDay.toStringAsFixed(1)} expenses/day',
-                              Icons.receipt,
-                            ),
-                            const SizedBox(height: 12),
+                          // Total Transactions Card
+                          _buildSmallMetricCard(
+                            context,
+                            theme,
+                            'Total Transactions',
+                            data.totalTransactions.toString(),
+                            '${data.expensesPerDay.toStringAsFixed(1)} expenses/day',
+                            Icons.receipt,
+                          ),
+                          const SizedBox(height: 12),
 
-                            // Projected Total Card
-                            _buildSmallMetricCard(
-                              context,
-                              theme,
-                              'Projected Total',
-                              'BDT ${(data.projectedTotal / 1000).toStringAsFixed(1)}K',
-                              '30-day projection',
-                              Icons.trending_up,
-                            ),
-                            const SizedBox(height: 24),
+                          // Projected Total Card
+                          _buildSmallMetricCard(
+                            context,
+                            theme,
+                            'Projected Total',
+                            'BDT ${(data.projectedTotal / 1000).toStringAsFixed(1)}K',
+                            '30-day projection',
+                            Icons.trending_up,
+                          ),
+                          const SizedBox(height: 24),
 
-                            // Expense Breakdown Section
-                            _buildSectionHeader(
-                              theme,
-                              'Expense Breakdown by Category',
-                            ),
-                            const SizedBox(height: 12),
-                            _buildExpenseBreakdownChart(context, theme, data),
-                            const SizedBox(height: 24),
+                          // Expense Breakdown Section
+                          _buildSectionHeader(
+                            theme,
+                            'Expense Breakdown by Category',
+                          ),
+                          const SizedBox(height: 12),
+                          _buildExpenseBreakdownChart(context, theme, data),
+                          const SizedBox(height: 24),
 
-                            // Category Distribution
-                            _buildSectionHeader(theme, 'Category Distribution'),
-                            const SizedBox(height: 12),
-                            _buildCategoryDistribution(context, theme, data),
-                            const SizedBox(height: 24),
+                          // Category Distribution
+                          _buildSectionHeader(theme, 'Category Distribution'),
+                          const SizedBox(height: 12),
+                          _buildCategoryDistribution(context, theme, data),
+                          const SizedBox(height: 24),
 
-                            // Top Meal Consumers
-                            _buildTopMealConsumers(context, theme, data),
-                            const SizedBox(height: 12),
+                          // Top Meal Consumers
+                          _buildTopMealConsumers(context, theme, data),
+                          const SizedBox(height: 12),
 
-                            // Top Contributors
-                            _buildTopContributors(context, theme, data),
-                            const SizedBox(height: 24),
+                          // Top Contributors
+                          _buildTopContributors(context, theme, data),
+                          const SizedBox(height: 24),
 
-                            // Recent Expenses
-                            _buildSectionHeader(theme, 'Recent Expenses'),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Latest transactions from all members',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.6,
-                                ),
+                          // Recent Expenses
+                          _buildSectionHeader(theme, 'Recent Expenses'),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Latest transactions from all members',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.6,
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            _buildRecentExpenses(context, theme, data),
-                            const SizedBox(height: 24),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildRecentExpenses(context, theme, data),
+                          const SizedBox(height: 24),
+                        ]),
                       ),
-                    );
-                  }
-                  return const Center(child: Text('Unknown state'));
-                },
-              ),
-            ),
-          ],
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const Center(child: Text('Unknown state'));
+          },
         ),
       ),
     );

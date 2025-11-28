@@ -66,6 +66,7 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MaterialApp.router(
         title: "Dorm of Decents",
+        debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
