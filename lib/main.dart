@@ -7,6 +7,7 @@ import 'package:dorm_of_decents/logic/splash_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 
 Future<void> main() async {
   // Ensure Flutter binding is initialized
@@ -23,17 +24,36 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Create AuthCubit instance
-    final authCubit = AuthCubit();
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
+  late final AuthCubit _authCubit;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create AuthCubit instance once
+    _authCubit = AuthCubit();
+    _router = createRouter(_authCubit);
+  }
+
+  @override
+  void dispose() {
+    _authCubit.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => authCubit),
+        BlocProvider.value(value: _authCubit),
         BlocProvider(create: (_) => SplashCubit()..startSplash()),
         BlocProvider(create: (_) => LoginCubit()),
       ],
@@ -42,7 +62,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
-        routerConfig: createRouter(authCubit),
+        routerConfig: _router,
       ),
     );
   }

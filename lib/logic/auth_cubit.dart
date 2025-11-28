@@ -1,4 +1,5 @@
 import 'package:dorm_of_decents/data/models/login_response.dart';
+import 'package:dorm_of_decents/data/services/api/profile.dart';
 import 'package:dorm_of_decents/data/services/client/dio_client.dart';
 import 'package:dorm_of_decents/data/services/storage/user_storage.dart';
 import 'package:equatable/equatable.dart';
@@ -99,4 +100,39 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Check if currently authenticated
   bool get isAuthenticated => state is AuthAuthenticated;
+
+  /// Refresh user profile data from API and update storage
+  Future<void> refreshUserProfile() async {
+    if (state is! AuthAuthenticated) return;
+
+    try {
+      final currentState = state as AuthAuthenticated;
+      final profileApi = ProfileAPi();
+      final profileResponse = await profileApi.fetchUserProfile();
+
+      // Convert ProfileData to UserData
+      final updatedUserData = UserData(
+        id: profileResponse.data.id,
+        email: profileResponse.data.email,
+        name: profileResponse.data.name,
+        role: profileResponse.data.role,
+      );
+
+      // Update storage
+      await UserStorage.saveUserData(updatedUserData);
+
+      // Update state
+      emit(
+        AuthAuthenticated(
+          accessToken: currentState.accessToken,
+          refreshToken: currentState.refreshToken,
+          userData: updatedUserData,
+        ),
+      );
+    } catch (e) {
+      // If profile not found in backend, that means user needs to be synced
+      // For now, keep existing user data and rethrow for UI to handle
+      rethrow;
+    }
+  }
 }
