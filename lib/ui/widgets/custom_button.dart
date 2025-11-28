@@ -14,6 +14,7 @@ class CustomButton extends StatelessWidget {
   final bool loading;
   final String? loadingLabel;
   final double borderRadius;
+  final IconData? icon;
 
   // Optional custom overrides
   final Color? customBg;
@@ -23,6 +24,7 @@ class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
     required this.label,
+    this.icon,
     this.loadingLabel,
     this.onPressed,
     this.variant = ButtonVariant.solid,
@@ -66,7 +68,7 @@ class CustomButton extends StatelessWidget {
     final destructive = theme.colorScheme.error;
     final fgOnPrimary = theme.colorScheme.onPrimary;
     final surface = theme.colorScheme.surface;
-    final outline = theme.colorScheme.outline.withOpacity(0.5);
+    final outline = theme.colorScheme.outline.withAlpha(50);
 
     // derive colors based on variant (can be overridden)
     Color bg;
@@ -144,12 +146,22 @@ class CustomButton extends StatelessWidget {
                       ),
                       SizedBox(width: 10),
                       Text(
-                        loadingLabel ?? label, // Show the original label instead of "Loading..." for consistency
+                        loadingLabel ??
+                            label, // Show the original label instead of "Loading..." for consistency
                         style: _textStyle(theme).copyWith(color: fg),
                       ),
                     ],
                   )
-                : Text(label, style: _textStyle(theme).copyWith(color: fg)),
+                : Row(
+                    mainAxisAlignment: .center,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, color: fg, size: _textStyle(theme).fontSize),
+                        SizedBox(width: 8),
+                      ],
+                      Text(label, style: _textStyle(theme).copyWith(color: fg)),
+                    ],
+                  ),
           ),
         ),
       ),

@@ -58,7 +58,7 @@ class CustomTextField extends StatelessWidget {
                   borderRadius: BorderRadius.circular(borderRadius),
                   borderSide: isBordered
                       ? BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.4),
+                          color: theme.colorScheme.outline.withAlpha(25),
                           width: 1,
                         )
                       : BorderSide.none,
@@ -67,7 +67,7 @@ class CustomTextField extends StatelessWidget {
                   borderRadius: BorderRadius.circular(borderRadius),
                   borderSide: isBordered
                       ? BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.4),
+                          color: theme.colorScheme.outline.withAlpha(25),
                         )
                       : BorderSide.none,
                 ),

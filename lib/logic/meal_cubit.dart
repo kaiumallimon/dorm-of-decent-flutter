@@ -19,12 +19,12 @@ class MealLoading extends MealState {
 }
 
 class MealLoaded extends MealState {
-  final List<Meal> meals;
+  final MealResponse mealResponse;
 
-  const MealLoaded({required this.meals});
+  const MealLoaded({required this.mealResponse});
 
   @override
-  List<Object> get props => [meals];
+  List<Object> get props => [mealResponse];
 }
 
 class MealError extends MealState {
@@ -58,7 +58,26 @@ class MealCubit extends Cubit<MealState> {
       if (mealResponse.meals.isEmpty) {
         emit(const MealEmpty());
       } else {
-        emit(MealLoaded(meals: mealResponse.meals));
+        emit(MealLoaded(mealResponse: mealResponse));
+      }
+    } catch (e) {
+      emit(MealError(message: e.toString()));
+    }
+  }
+
+  Future<void> refreshMeals() async {
+    try {
+      // Emit loading state to show shimmer
+      emit(const MealLoading());
+
+      // Fetch meals from API (automatically uses Supabase token)
+      final mealApi = MealApi();
+      final mealResponse = await mealApi.fetchMeals();
+
+      if (mealResponse.meals.isEmpty) {
+        emit(const MealEmpty());
+      } else {
+        emit(MealLoaded(mealResponse: mealResponse));
       }
     } catch (e) {
       emit(MealError(message: e.toString()));
