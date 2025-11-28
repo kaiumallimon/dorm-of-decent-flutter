@@ -1,11 +1,35 @@
 import 'package:dorm_of_decents/configs/theme.dart';
+import 'package:dorm_of_decents/data/services/storage/user_storage.dart';
 import 'package:dorm_of_decents/logic/dashboard_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';
+import 'package:dorm_of_decents/utils/datetime_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  String userName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final userData = await UserStorage.getUserData();
+    if (userData != null && mounted) {
+      setState(() {
+        userName = userData.name;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +59,65 @@ class DashboardPage extends StatelessWidget {
                 },
                 child: CustomScrollView(
                   slivers: [
+                    SliverAppBar(
+                      expandedHeight: 120,
+                      floating: false,
+                      pinned: true,
+                      elevation: 0,
+                      surfaceTintColor: Colors.transparent,
+                      backgroundColor: theme.scaffoldBackgroundColor,
+                      flexibleSpace: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isCollapsed =
+                              constraints.maxHeight <=
+                              kToolbarHeight +
+                                  MediaQuery.of(context).padding.top;
+                          return FlexibleSpaceBar(
+                            titlePadding: EdgeInsets.zero,
+                            title: isCollapsed
+                                ? Container(
+                                    alignment: Alignment.centerLeft,
+                                    padding: const EdgeInsets.only(left: 16),
+                                    child: Text(
+                                      'Overview',
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  )
+                                : null,
+                            background: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 24,
+                                right: 24,
+                                top: 16,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Hello, ${userName.isNotEmpty ? userName : 'Guest'}!',
+                                    style: theme.textTheme.headlineMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    DatetimeUtil.getFormattedDateToday(),
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
