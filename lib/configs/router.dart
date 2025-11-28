@@ -1,15 +1,18 @@
 import 'dart:async';
 
+import 'package:animations/animations.dart';
 import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/ui/pages/account_page.dart';
+import 'package:dorm_of_decents/ui/pages/dashboard_page.dart';
 import 'package:dorm_of_decents/ui/pages/dashboard_wrapper.dart';
 import 'package:dorm_of_decents/ui/pages/expenses_page.dart';
-import 'package:dorm_of_decents/ui/pages/home_page.dart';
 import 'package:dorm_of_decents/ui/pages/login_page.dart';
+import 'package:dorm_of_decents/ui/pages/logs_page.dart';
 import 'package:dorm_of_decents/ui/pages/meals_page.dart';
 import 'package:dorm_of_decents/ui/pages/settlements_page.dart';
 import 'package:dorm_of_decents/ui/pages/splash_page.dart';
+import 'package:dorm_of_decents/ui/pages/users_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,7 +66,7 @@ GoRouter createRouter(AuthCubit authCubit) {
           GoRoute(
             path: AppRoutes.home,
             pageBuilder: (context, state) =>
-                const NoTransitionPage(child: HomePage()),
+                const NoTransitionPage(child: DashboardPage()),
           ),
           GoRoute(
             path: AppRoutes.meals,
@@ -85,7 +88,21 @@ GoRouter createRouter(AuthCubit authCubit) {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: AccountPage()),
           ),
+
+          // Additional routes
+          GoRoute(
+            path: AppRoutes.users,
+            pageBuilder: (context, state) =>
+                material3TransitionPage(child: const UsersPage()),
+          ),
         ],
+      ),
+
+      // Standalone routes (without bottom navigation)
+      GoRoute(
+        path: AppRoutes.logs,
+        pageBuilder: (context, state) =>
+            material3TransitionPage(child: const LogsPage()),
       ),
     ],
   );
@@ -107,4 +124,24 @@ class GoRouterRefreshStream extends ChangeNotifier {
     _subscription.cancel();
     super.dispose();
   }
+}
+
+CustomTransitionPage<T> material3TransitionPage<T>({
+  required Widget child,
+  Duration duration = const Duration(milliseconds: 300),
+  SharedAxisTransitionType type = SharedAxisTransitionType.scaled,
+}) {
+  return CustomTransitionPage<T>(
+    transitionDuration: duration,
+    reverseTransitionDuration: duration,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return SharedAxisTransition(
+        animation: animation,
+        secondaryAnimation: secondaryAnimation,
+        transitionType: type,
+        child: child,
+      );
+    },
+  );
 }

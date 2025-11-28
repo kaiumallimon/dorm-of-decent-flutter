@@ -2,8 +2,11 @@ import 'package:dorm_of_decents/configs/router.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/data/services/client/supabase_client.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
+import 'package:dorm_of_decents/logic/dashboard_cubit.dart';
+import 'package:dorm_of_decents/logic/expense_cubit.dart';
 import 'package:dorm_of_decents/logic/login_cubit.dart';
 import 'package:dorm_of_decents/logic/meal_cubit.dart';
+import 'package:dorm_of_decents/logic/settlement_cubit.dart';
 import 'package:dorm_of_decents/logic/splash_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,10 +59,14 @@ class _MyAppState extends State<MyApp> {
         BlocProvider.value(value: _authCubit),
         BlocProvider(create: (_) => SplashCubit()..startSplash()),
         BlocProvider(create: (_) => LoginCubit()),
+        BlocProvider(create: (_) => DashboardCubit()),
         BlocProvider(create: (_) => MealCubit()),
+        BlocProvider(create: (_) => ExpenseCubit()),
+        BlocProvider(create: (_) => SettlementCubit()),
       ],
       child: MaterialApp.router(
         title: "Dorm of Decents",
+        debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,

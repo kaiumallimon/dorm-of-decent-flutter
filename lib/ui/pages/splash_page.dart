@@ -1,5 +1,6 @@
 import 'package:dorm_of_decents/configs/assets.dart';
 import 'package:dorm_of_decents/configs/colors.dart';
+import 'package:dorm_of_decents/configs/constants.dart';
 import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
@@ -56,15 +57,33 @@ class _SplashPageState extends State<SplashPage> {
             fit: StackFit.expand,
             children: [
               Center(
-                child: Container(
-                  width: windowSize.width * 0.25,
-                  height: windowSize.width * 0.25,
-                  padding: EdgeInsets.all(windowSize.width * 0.05),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary.withAlpha(75)),
-                  ),
-                  child: Image.asset(AppAssets.appLogo, fit: BoxFit.contain),
+                child: Column(
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .center,
+                  children: [
+                    Container(
+                      width: windowSize.width * 0.25,
+                      height: windowSize.width * 0.25,
+                      padding: EdgeInsets.all(windowSize.width * 0.05),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.primary.withAlpha(75),
+                        ),
+                      ),
+                      child: Image.asset(
+                        AppAssets.appLogo,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    Text(
+                      AppConstants.appTitle,
+                      style: AppTheme.getTheme(context).textTheme.headlineSmall,
+                    ),
+                  ],
                 ),
               ),
 

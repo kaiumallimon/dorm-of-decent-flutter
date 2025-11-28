@@ -9,4 +9,6 @@ class AppRoutes {
   static const String expenses = '/dashboard/expenses';
   static const String settlements = '/dashboard/settlements';
   static const String account = '/dashboard/account';
+  static const String logs = '/dashboard/logs';
+  static const String users = '/dashboard/users';
 }

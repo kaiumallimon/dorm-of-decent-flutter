@@ -1,3 +1,4 @@
+import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/ui/pages/account/account_actions.dart';
@@ -7,6 +8,7 @@ import 'package:dorm_of_decents/ui/pages/account/profile_info_section.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_page_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key});
@@ -110,6 +112,56 @@ class AccountPage extends StatelessWidget {
 
                           // Info Cards
                           InfoCardsSection(userData: userData),
+                          const SizedBox(height: 30),
+
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Row(
+                              mainAxisAlignment: .start,
+                              children: [
+                                Text(
+                                  'Menu',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // menu for logs and users
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Row(
+                              mainAxisAlignment: .start,
+                              spacing: 15,
+                              children: [
+                                Expanded(
+                                  child: AccountsMenuCard(
+                                    title: 'Logs',
+                                    icon: Icons.history_outlined,
+                                    onTap: () {
+                                      context.push(
+                                        AppRoutes.logs,
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Expanded(
+                                  child: AccountsMenuCard(
+                                    title: 'Users',
+                                    icon: Icons.people_outline,
+                                    onTap: () {
+                                      context.push(
+                                        AppRoutes.users,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
                           const SizedBox(height: 40),
 
                           // Action Buttons
@@ -124,6 +176,57 @@ class AccountPage extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class AccountsMenuCard extends StatelessWidget {
+  const AccountsMenuCard({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 150,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.getTheme(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppTheme.getTheme(
+              context,
+            ).colorScheme.outline.withOpacity(0.1),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 32,
+              color: AppTheme.getTheme(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: AppTheme.getTheme(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

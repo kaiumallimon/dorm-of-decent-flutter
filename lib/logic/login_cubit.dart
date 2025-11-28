@@ -3,6 +3,7 @@ import 'package:dorm_of_decents/data/services/auth/supabase_auth_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 abstract class LoginState extends Equatable {
   @override
@@ -69,7 +70,13 @@ class LoginCubit extends Cubit<LoginState> {
       // emit failure state
       emit(LoginFailure(error: e.toString()));
     }
+
+    
   }
+
+  Future<void> openUrl(String url) async {
+      await launchUrl(Uri.parse(url));
+    }
 
   @override
   Future<void> close() {

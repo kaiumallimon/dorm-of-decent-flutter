@@ -1,4 +1,5 @@
 import 'package:dorm_of_decents/data/models/meal_response.dart';
+import 'package:dorm_of_decents/data/services/api/logs.dart';
 import 'package:dorm_of_decents/data/services/client/supabase_client.dart';
 
 class MealApi {
@@ -96,7 +97,36 @@ class MealApi {
           .select('id')
           .single();
 
-      return {'success': true, 'id': insertResponse['id']};
+      final mealId = insertResponse['id'];
+
+      // Log the action
+      try {
+        String? targetUserName;
+        if (targetUserId != user.id) {
+          final targetProfile = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('id', targetUserId)
+              .single();
+          targetUserName = targetProfile['name'];
+        }
+
+        await LogsApi().createLog(
+          action: 'create',
+          entityType: 'meal',
+          entityId: mealId,
+          metadata: {
+            'meal_count': mealCount,
+            'date': date,
+            if (targetUserId != user.id) 'target_user_id': targetUserId,
+            if (targetUserName != null) 'target_user_name': targetUserName,
+          },
+        );
+      } catch (e) {
+        // Continue even if logging fails
+      }
+
+      return {'success': true, 'id': mealId};
     } catch (e) {
       return {'error': 'Failed to add meal. Please try again.'};
     }
@@ -113,6 +143,17 @@ class MealApi {
       }
 
       await supabase.from('meals').delete().eq('id', id);
+
+      // Log the action
+      try {
+        await LogsApi().createLog(
+          action: 'delete',
+          entityType: 'meal',
+          entityId: id,
+        );
+      } catch (e) {
+        // Continue even if logging fails
+      }
 
       return {'success': true};
     } catch (e) {

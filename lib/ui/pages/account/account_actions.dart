@@ -20,18 +20,6 @@ class AccountActions extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: CustomButton(
-              label: 'Edit Profile',
-              variant: ButtonVariant.outline,
-              size: ButtonSize.lg,
-              onPressed: () {
-                // TODO: Navigate to edit profile
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: CustomButton(
               label: 'Logout',
               variant: ButtonVariant.destructive,
               size: ButtonSize.lg,
@@ -61,6 +49,7 @@ class AccountActions extends StatelessWidget {
                         variant: ButtonVariant.ghost,
                         onPressed: () => Navigator.pop(context, false),
                       ),
+                      const SizedBox(height: 12),
                       CustomButton(
                         label: 'Logout',
                         variant: ButtonVariant.destructive,
