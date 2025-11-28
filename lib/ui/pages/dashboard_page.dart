@@ -38,10 +38,11 @@ class DashboardPage extends StatelessWidget {
                 child: CustomScrollView(
                   slivers: [
                     SliverAppBar(
-                      expandedHeight: 120,
+                      expandedHeight: 90,
                       floating: false,
                       pinned: true,
                       elevation: 0,
+
                       surfaceTintColor: Colors.transparent,
                       backgroundColor: theme.scaffoldBackgroundColor,
                       flexibleSpace: LayoutBuilder(

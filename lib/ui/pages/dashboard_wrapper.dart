@@ -1,6 +1,7 @@
 import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 class DashboardWrapper extends StatefulWidget {
@@ -49,6 +50,19 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
   Widget build(BuildContext context) {
     final theme = AppTheme.getTheme(context);
     final currentIndex = _getCurrentIndex(context);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: theme.scaffoldBackgroundColor,
+        statusBarIconBrightness: theme.brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
+        systemNavigationBarColor: theme.colorScheme.surface,
+        systemNavigationBarIconBrightness: theme.brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
