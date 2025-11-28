@@ -76,13 +76,13 @@ class DashboardPage extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   Text(
-                                    'Hello, ${userName.isNotEmpty ? userName : 'Guest'}!',
-                                    style: theme.textTheme.headlineMedium
+                                    'Welcome back, ${userName.isNotEmpty ? userName : 'Guest'}!',
+                                    style: theme.textTheme.headlineSmall
                                         ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    DatetimeUtil.getFormattedDateToday(),
+                                    "It's ${DatetimeUtil.getFormattedDateToday()}",
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: theme.colorScheme.onSurface
                                           .withOpacity(0.6),

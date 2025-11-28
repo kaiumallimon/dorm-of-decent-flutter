@@ -18,7 +18,7 @@ class InfoCard extends StatelessWidget {
     final theme = AppTheme.getTheme(context);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -29,7 +29,7 @@ class InfoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+              color: theme.colorScheme.primaryContainer.withAlpha(50),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, size: 24, color: theme.colorScheme.primary),
@@ -49,7 +49,7 @@ class InfoCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
