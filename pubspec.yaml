@@ -17,6 +17,18 @@ dependencies:
   flutter_bloc: ^9.1.1
   toastification: ^3.0.3
   dio: ^5.9.0
+  go_router: ^17.0.0
+  flutter_screenutil: ^5.9.3
+  shimmer: ^3.0.0
+  flutter_dotenv: ^6.0.0
+  equatable: ^2.0.7
+  grid_background: ^0.0.1
+  url_launcher: ^6.3.2
+  blur: ^4.0.2
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.3
+  supabase_flutter: ^2.9.1
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -37,10 +49,10 @@ flutter:
   fonts:
     - family: Geist
       fonts:
-        - asset: fonts/Geist-Regular.ttf
-        - asset: fonts/Geist-Medium.ttf
+        - asset: assets/fonts/Geist-Regular.ttf
+        - asset: assets/fonts/Geist-Medium.ttf
           weight: 500
-        - asset: fonts/Geist-SemiBold.ttf
+        - asset: assets/fonts/Geist-SemiBold.ttf
           weight: 600
-        - asset: fonts/Geist-Bold.ttf
+        - asset: assets/fonts/Geist-Bold.ttf
           weight: 700
