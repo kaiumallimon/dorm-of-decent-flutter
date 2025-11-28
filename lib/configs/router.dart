@@ -91,16 +91,18 @@ GoRouter createRouter(AuthCubit authCubit) {
 
           // Additional routes
           GoRoute(
-            path: AppRoutes.logs,
-            pageBuilder: (context, state) =>
-                material3TransitionPage(child: const LogsPage()),
-          ),
-          GoRoute(
             path: AppRoutes.users,
             pageBuilder: (context, state) =>
                 material3TransitionPage(child: const UsersPage()),
           ),
         ],
+      ),
+
+      // Standalone routes (without bottom navigation)
+      GoRoute(
+        path: AppRoutes.logs,
+        pageBuilder: (context, state) =>
+            material3TransitionPage(child: const LogsPage()),
       ),
     ],
   );
