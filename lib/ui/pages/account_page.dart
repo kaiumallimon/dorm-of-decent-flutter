@@ -4,7 +4,7 @@ import 'package:dorm_of_decents/ui/pages/account/account_actions.dart';
 import 'package:dorm_of_decents/ui/pages/account/info_cards_section.dart';
 import 'package:dorm_of_decents/ui/pages/account/profile_avatar.dart';
 import 'package:dorm_of_decents/ui/pages/account/profile_info_section.dart';
-import 'package:dorm_of_decents/ui/pages/account/custom_page_header.dart';
+import 'package:dorm_of_decents/ui/widgets/custom_page_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

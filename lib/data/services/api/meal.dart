@@ -1,49 +1,46 @@
-import 'package:dio/dio.dart';
 import 'package:dorm_of_decents/data/models/meal_response.dart';
-import 'package:dorm_of_decents/data/services/client/dio_client.dart';
+import 'package:dorm_of_decents/data/services/client/supabase_client.dart';
 
 class MealApi {
   Future<MealResponse> fetchMeals() async {
     try {
-      final client = ApiClient();
+      final supabase = SupabaseService.client;
 
-      // Ensure tokens are loaded before making request
-      await client.loadTokensFromStorage();
+      // 1. Get active month
+      final monthResponse = await supabase
+          .from('months')
+          .select('*')
+          .eq('status', 'active')
+          .single();
 
-      final response = await client.get('/meals');
+      final monthId = monthResponse['id'];
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        final mealResponse = MealResponse.fromJson(response.data);
-        print(mealResponse.toJson());
-        return mealResponse;
-      } else {
-        throw Exception(response.data['error'] ?? 'Failed to fetch meals');
-      }
-    } on DioException catch (e) {
-      // Extract error message from response
-      String errorMessage = 'Failed to fetch meals data. Please try again.';
+      // 2. Get meals for active month with profile data
+      final mealsResponse = await supabase
+          .from('meals')
+          .select('''
+            id,
+            meal_count,
+            date,
+            created_at,
+            user_id,
+            month_id,
+            profiles (
+              id,
+              name
+            )
+          ''')
+          .eq('month_id', monthId)
+          .order('date', ascending: false);
 
-      if (e.response?.data != null) {
-        if (e.response!.data is Map && e.response!.data['error'] != null) {
-          errorMessage = e.response!.data['error'];
-        } else if (e.response!.statusCode == 404) {
-          errorMessage = 'Meals not found.';
-        } else if (e.response!.statusCode == 401) {
-          errorMessage = 'Unauthorized. Please login again.';
-        } else if (e.response!.statusCode == 500) {
-          errorMessage = 'Server error. Please try again later.';
-        }
-      } else if (e.type == DioExceptionType.connectionTimeout) {
-        errorMessage = 'Connection timeout. Please check your internet.';
-      } else if (e.type == DioExceptionType.receiveTimeout) {
-        errorMessage = 'Server response timeout. Please try again.';
-      } else if (e.type == DioExceptionType.connectionError) {
-        errorMessage = 'Network error. Please check your connection.';
-      }
+      // 3. Convert to MealResponse format
+      final List<Meal> meals = (mealsResponse as List).map((mealData) {
+        return Meal.fromJson(mealData as Map<String, dynamic>);
+      }).toList();
 
-      throw Exception(errorMessage);
+      return MealResponse(success: true, meals: meals);
     } catch (e) {
-      rethrow;
+      throw Exception('Failed to fetch meals: ${e.toString()}');
     }
   }
 }

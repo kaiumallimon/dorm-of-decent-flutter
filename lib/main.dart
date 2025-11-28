@@ -1,6 +1,6 @@
 import 'package:dorm_of_decents/configs/router.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
-import 'package:dorm_of_decents/data/services/client/dio_client.dart';
+import 'package:dorm_of_decents/data/services/client/supabase_client.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/login_cubit.dart';
 import 'package:dorm_of_decents/logic/meal_cubit.dart';
@@ -17,12 +17,11 @@ Future<void> main() async {
   // Load environment variables
   await dotenv.load(fileName: '.env');
 
-  // Initialize ApiClient and load tokens from storage
-  final apiClient = ApiClient();
-  await apiClient.loadTokensFromStorage();
+  // Initialize Supabase
+  await SupabaseService.initialize();
 
   // Run the app
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {

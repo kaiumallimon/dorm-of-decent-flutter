@@ -1,5 +1,5 @@
 import 'package:dorm_of_decents/data/models/login_response.dart';
-import 'package:dorm_of_decents/data/services/api/login.dart';
+import 'package:dorm_of_decents/data/services/auth/supabase_auth_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,7 +52,12 @@ class LoginCubit extends Cubit<LoginState> {
     emit(LoginLoading());
 
     try {
-      final response = await LoginApi.login(email: email, password: password);
+      // Use Supabase authentication
+      final authService = SupabaseAuthService();
+      final response = await authService.login(
+        email: email,
+        password: password,
+      );
 
       // Clear controllers on successful login
       emailController.clear();

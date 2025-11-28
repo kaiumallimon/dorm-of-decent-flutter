@@ -1,17 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:dorm_of_decents/configs/environments.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dorm_of_decents/data/services/client/supabase_client.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
   late Dio dio;
-
-  static const _storage = FlutterSecureStorage();
-  static const _keyAccessToken = 'access_token';
-  static const _keyRefreshToken = 'refresh_token';
-
-  String? _accessToken;
-  String? _refreshToken;
 
   factory ApiClient() => _instance;
 
@@ -28,36 +21,39 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Attach access token if available
-          if (_accessToken == null) {
-            await loadTokensFromStorage();
-          }
-          if (_accessToken != null) {
-            options.headers['Authorization'] = 'Bearer $_accessToken';
+          // Get access token from Supabase session
+          final accessToken = SupabaseService.accessToken;
+          if (accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
           }
           return handler.next(options);
         },
         onResponse: (response, handler) {
           return handler.next(response);
         },
-        onError: (DioError error, handler) async {
-          // Handle 401 and refresh token
-          if (error.response?.statusCode == 401 && _refreshToken != null) {
-            try {
-              await _refreshAccessToken();
+        onError: (DioException error, handler) async {
+          // Supabase handles token refresh automatically
+          // Just retry the request if we get a 401
+          if (error.response?.statusCode == 401) {
+            // Wait a moment for Supabase to refresh
+            await Future.delayed(const Duration(milliseconds: 100));
 
-              // Retry original request
-              final opts = error.requestOptions;
-              opts.headers['Authorization'] = 'Bearer $_accessToken';
-              final cloneReq = await dio.request(
-                opts.path,
-                options: Options(method: opts.method, headers: opts.headers),
-                data: opts.data,
-                queryParameters: opts.queryParameters,
-              );
-              return handler.resolve(cloneReq);
-            } catch (e) {
-              return handler.next(error);
+            // Retry original request with new token
+            final opts = error.requestOptions;
+            final newToken = SupabaseService.accessToken;
+            if (newToken != null) {
+              opts.headers['Authorization'] = 'Bearer $newToken';
+              try {
+                final cloneReq = await dio.request(
+                  opts.path,
+                  options: Options(method: opts.method, headers: opts.headers),
+                  data: opts.data,
+                  queryParameters: opts.queryParameters,
+                );
+                return handler.resolve(cloneReq);
+              } catch (e) {
+                return handler.next(error);
+              }
             }
           }
           return handler.next(error);
@@ -66,66 +62,30 @@ class ApiClient {
     );
   }
 
-  // Load tokens from secure storage
+  // Load tokens from Supabase (kept for compatibility)
   Future<void> loadTokensFromStorage() async {
-    _accessToken = await _storage.read(key: _keyAccessToken);
-    _refreshToken = await _storage.read(key: _keyRefreshToken);
+    // Supabase manages tokens automatically
   }
 
-  // Save tokens to secure storage
-  Future<void> _saveTokensToStorage() async {
-    if (_accessToken != null) {
-      await _storage.write(key: _keyAccessToken, value: _accessToken);
-    }
-    if (_refreshToken != null) {
-      await _storage.write(key: _keyRefreshToken, value: _refreshToken);
-    }
-  }
-
-  // Set tokens in client and storage
+  // Set tokens (kept for compatibility but not used with Supabase)
   Future<void> setTokens({
     required String accessToken,
     required String refreshToken,
   }) async {
-    _accessToken = accessToken;
-    _refreshToken = refreshToken;
-    await _saveTokensToStorage();
+    // Tokens are managed by Supabase
   }
 
-  // Get current tokens
+  // Get current tokens from Supabase
   Future<Map<String, String?>> getTokens() async {
-    if (_accessToken == null || _refreshToken == null) {
-      await loadTokensFromStorage();
-    }
-    return {'accessToken': _accessToken, 'refreshToken': _refreshToken};
+    return {
+      'accessToken': SupabaseService.accessToken,
+      'refreshToken': SupabaseService.refreshToken,
+    };
   }
 
-  // Clear tokens (logout)
+  // Clear tokens (logout from Supabase)
   Future<void> clearTokens() async {
-    _accessToken = null;
-    _refreshToken = null;
-    await _storage.delete(key: _keyAccessToken);
-    await _storage.delete(key: _keyRefreshToken);
-  }
-
-  // Refresh token logic
-  Future<void> _refreshAccessToken() async {
-    if (_refreshToken == null) throw Exception('No refresh token available');
-
-    final response = await dio.post(
-      'auth/refresh',
-      data: {'refresh_token': _refreshToken},
-    );
-
-    if (response.statusCode == 200 && response.data['success'] == true) {
-      _accessToken = response.data['access_token'];
-      _refreshToken = response.data['refresh_token'];
-      await _saveTokensToStorage();
-      print('Token refreshed successfully');
-    } else {
-      await clearTokens();
-      throw Exception('Failed to refresh token');
-    }
+    await SupabaseService.client.auth.signOut();
   }
 
   // GET request

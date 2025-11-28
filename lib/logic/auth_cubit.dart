@@ -1,6 +1,6 @@
 import 'package:dorm_of_decents/data/models/login_response.dart';
 import 'package:dorm_of_decents/data/services/api/profile.dart';
-import 'package:dorm_of_decents/data/services/client/dio_client.dart';
+import 'package:dorm_of_decents/data/services/client/supabase_client.dart';
 import 'package:dorm_of_decents/data/services/storage/user_storage.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,33 +33,32 @@ class AuthUnauthenticated extends AuthState {}
 
 /// Auth Cubit to manage authentication state persistently
 class AuthCubit extends Cubit<AuthState> {
-  final ApiClient _apiClient = ApiClient();
-
   AuthCubit() : super(AuthInitial());
 
-  /// Check if user is authenticated by loading tokens from storage
+  /// Check if user is authenticated by checking Supabase session
   Future<void> checkAuthStatus() async {
     emit(AuthLoading());
 
     try {
-      await _apiClient.loadTokensFromStorage();
+      // Check if Supabase has an active session
+      if (SupabaseService.isAuthenticated) {
+        final accessToken = SupabaseService.accessToken;
+        final refreshToken = SupabaseService.refreshToken;
 
-      // Get tokens from storage
-      final tokens = await _apiClient.getTokens();
+        // Get user data from storage
+        final userData = await UserStorage.getUserData();
 
-      // Get user data from storage
-      final userData = await UserStorage.getUserData();
-
-      if (tokens['accessToken'] != null &&
-          tokens['refreshToken'] != null &&
-          userData != null) {
-        emit(
-          AuthAuthenticated(
-            accessToken: tokens['accessToken']!,
-            refreshToken: tokens['refreshToken']!,
-            userData: userData,
-          ),
-        );
+        if (accessToken != null && refreshToken != null && userData != null) {
+          emit(
+            AuthAuthenticated(
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+              userData: userData,
+            ),
+          );
+        } else {
+          emit(AuthUnauthenticated());
+        }
       } else {
         emit(AuthUnauthenticated());
       }
@@ -74,12 +73,8 @@ class AuthCubit extends Cubit<AuthState> {
     required String refreshToken,
     required UserData userData,
   }) async {
-    await _apiClient.setTokens(
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    );
-
-    // Save user data to local storage
+    // Supabase handles token storage automatically
+    // Just save user data to local storage
     await UserStorage.saveUserData(userData);
 
     emit(
@@ -91,9 +86,9 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
-  /// Logout user by clearing tokens and user data
+  /// Logout user by signing out from Supabase and clearing user data
   Future<void> logout() async {
-    await _apiClient.clearTokens();
+    await SupabaseService.client.auth.signOut();
     await UserStorage.clearUserData();
     emit(AuthUnauthenticated());
   }

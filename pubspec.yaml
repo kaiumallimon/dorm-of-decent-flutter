@@ -25,9 +25,9 @@ dependencies:
   grid_background: ^0.0.1
   url_launcher: ^6.3.2
   blur: ^4.0.2
-  flutter_secure_storage: ^9.2.4
   path_provider: ^2.1.5
   shared_preferences: ^2.5.3
+  supabase_flutter: ^2.9.1
 
 dev_dependencies:
   flutter_test:

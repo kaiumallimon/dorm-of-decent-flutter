@@ -44,15 +44,14 @@ class MealEmpty extends MealState {
 }
 
 class MealCubit extends Cubit<MealState> {
-  MealCubit(): super(const MealInitial());
+  MealCubit() : super(const MealInitial());
 
-  Future<void> fetchMeals()async{
+  Future<void> fetchMeals() async {
     try {
-      
       // Emit loading state
       emit(const MealLoading());
 
-      // Fetch meals from API
+      // Fetch meals from API (automatically uses Supabase token)
       final mealApi = MealApi();
       final mealResponse = await mealApi.fetchMeals();
 
