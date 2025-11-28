@@ -206,12 +206,3 @@ test/
 - WhatsApp: [+8801738439423](https://wa.me/+8801738439423)
 - Contact for account creation/updates
 
----
-
-## 📚 Additional Docs
-
-- [Password Reset Guide](./PASSWORD_RESET_GUIDE.md)
-- [Logs Setup](./LOGS_SETUP.md)
-- [Setup Guide](./SETUP_GUIDE.md)
-
-**Made with ❤️ for better dorm management**
