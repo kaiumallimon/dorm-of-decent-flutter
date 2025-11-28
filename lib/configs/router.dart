@@ -54,6 +54,8 @@ GoRouter createRouter(AuthCubit authCubit) {
         path: AppRoutes.dashboard,
         builder: (context, state) => const DashboardWrapper(),
       ),
+
+      
     ],
   );
 }
