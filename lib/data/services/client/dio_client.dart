@@ -92,6 +92,14 @@ class ApiClient {
     await _saveTokensToStorage();
   }
 
+  // Get current tokens
+  Future<Map<String, String?>> getTokens() async {
+    if (_accessToken == null || _refreshToken == null) {
+      await loadTokensFromStorage();
+    }
+    return {'accessToken': _accessToken, 'refreshToken': _refreshToken};
+  }
+
   // Clear tokens (logout)
   Future<void> clearTokens() async {
     _accessToken = null;

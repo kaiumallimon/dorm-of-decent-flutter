@@ -1,7 +1,7 @@
 import 'package:dorm_of_decents/configs/constants.dart';
 import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
-import 'package:dorm_of_decents/data/services/client/dio_client.dart';
+import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/login_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/app_logo.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_button.dart';
@@ -55,8 +55,9 @@ class LoginPage extends StatelessWidget {
           );
         } else if (state is LoginSuccess) {
           final response = state.loginResponse;
-          final apiClient = ApiClient();
-          apiClient.setTokens(
+
+          // Set authentication state
+          context.read<AuthCubit>().setAuthentication(
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
           );
