@@ -1,4 +1,6 @@
+import 'package:dorm_of_decents/data/models/login_response.dart';
 import 'package:dorm_of_decents/data/services/client/dio_client.dart';
+import 'package:dorm_of_decents/data/services/storage/user_storage.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,11 +16,16 @@ class AuthLoading extends AuthState {}
 class AuthAuthenticated extends AuthState {
   final String accessToken;
   final String refreshToken;
+  final UserData userData;
 
-  AuthAuthenticated({required this.accessToken, required this.refreshToken});
+  AuthAuthenticated({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.userData,
+  });
 
   @override
-  List<Object?> get props => [accessToken, refreshToken];
+  List<Object?> get props => [accessToken, refreshToken, userData];
 }
 
 class AuthUnauthenticated extends AuthState {}
@@ -39,11 +46,17 @@ class AuthCubit extends Cubit<AuthState> {
       // Get tokens from storage
       final tokens = await _apiClient.getTokens();
 
-      if (tokens['accessToken'] != null && tokens['refreshToken'] != null) {
+      // Get user data from storage
+      final userData = await UserStorage.getUserData();
+
+      if (tokens['accessToken'] != null &&
+          tokens['refreshToken'] != null &&
+          userData != null) {
         emit(
           AuthAuthenticated(
             accessToken: tokens['accessToken']!,
             refreshToken: tokens['refreshToken']!,
+            userData: userData,
           ),
         );
       } else {
@@ -54,24 +67,33 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Set authentication tokens (called after successful login)
+  /// Set authentication tokens and user data (called after successful login)
   Future<void> setAuthentication({
     required String accessToken,
     required String refreshToken,
+    required UserData userData,
   }) async {
     await _apiClient.setTokens(
       accessToken: accessToken,
       refreshToken: refreshToken,
     );
 
+    // Save user data to local storage
+    await UserStorage.saveUserData(userData);
+
     emit(
-      AuthAuthenticated(accessToken: accessToken, refreshToken: refreshToken),
+      AuthAuthenticated(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        userData: userData,
+      ),
     );
   }
 
-  /// Logout user by clearing tokens
+  /// Logout user by clearing tokens and user data
   Future<void> logout() async {
     await _apiClient.clearTokens();
+    await UserStorage.clearUserData();
     emit(AuthUnauthenticated());
   }
 

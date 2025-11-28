@@ -56,10 +56,11 @@ class LoginPage extends StatelessWidget {
         } else if (state is LoginSuccess) {
           final response = state.loginResponse;
 
-          // Set authentication state
+          // Set authentication state with user data
           context.read<AuthCubit>().setAuthentication(
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
+            userData: response.userData,
           );
 
           context.pushReplacement(AppRoutes.home);

@@ -59,6 +59,7 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
         backgroundColor: theme.colorScheme.surface,
         indicatorColor: theme.colorScheme.primary.withOpacity(0.15),
         elevation: 3,
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
