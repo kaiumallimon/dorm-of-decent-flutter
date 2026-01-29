@@ -69,6 +69,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
         final usersResponse = await supabase
             .from('profiles')
             .select('id, name')
+            .eq('isActive', true)
             .order('name');
 
         setState(() {

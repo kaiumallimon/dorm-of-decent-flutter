@@ -1,6 +1,7 @@
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/bills_cubit.dart';
+import 'package:dorm_of_decents/ui/widgets/add_bill_dialog.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_button.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_dropdown.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_page_header.dart';
@@ -20,6 +21,13 @@ class _BillsPageState extends State<BillsPage> {
   String selectedBillType = 'All Types';
   String selectedPaidBy = 'All Members';
   String selectedSort = 'Date (Newest)';
+
+  Future<void> _showAddBillDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) => const AddBillDialog(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +50,7 @@ class _BillsPageState extends State<BillsPage> {
                       return CustomButton(
                         label: 'Add',
                         icon: Icons.add_rounded,
-                        onPressed: () {
-                          // TODO: Implement add bill dialog
-                        },
+                        onPressed: _showAddBillDialog,
                       );
                     }
                     return const SizedBox.shrink();

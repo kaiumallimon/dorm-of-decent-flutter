@@ -1,7 +1,7 @@
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/data/services/api/logs.dart';
 import 'package:dorm_of_decents/data/services/client/supabase_client.dart';
-import 'package:dorm_of_decents/logic/expense_cubit.dart';
+import 'package:dorm_of_decents/logic/bills_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_button.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_dropdown.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_textfield.dart';
@@ -10,42 +10,73 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:toastification/toastification.dart';
 
-class AddExpenseDialog extends StatefulWidget {
-  const AddExpenseDialog({super.key});
+class AddBillDialog extends StatefulWidget {
+  const AddBillDialog({super.key});
 
   @override
-  State<AddExpenseDialog> createState() => _AddExpenseDialogState();
+  State<AddBillDialog> createState() => _AddBillDialogState();
 }
 
-class _AddExpenseDialogState extends State<AddExpenseDialog> {
+class _AddBillDialogState extends State<AddBillDialog> {
   final _dateController = TextEditingController();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
-  bool _isAdmin = false;
   List<Map<String, dynamic>> _users = [];
   String? _selectedUserId;
-  String _selectedCategory = 'food';
+  String _selectedBillType = 'electricity';
   bool _isLoadingData = true;
   String? _activeMonthId;
 
-  final List<Map<String, String>> _categories = [
-    {'value': 'food', 'label': 'Food'},
+  final List<Map<String, String>> _billTypes = [
     {'value': 'electricity', 'label': 'Electricity'},
-    {'value': 'internet', 'label': 'Internet'},
     {'value': 'gas', 'label': 'Gas'},
-    {'value': 'misc', 'label': 'Miscellaneous'},
+    {'value': 'internet', 'label': 'Internet'},
   ];
 
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  String _formatDisplayDate(DateTime date) {
+    final months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    final day = date.day;
+    final suffix = _getDaySuffix(day);
+    return '${months[date.month - 1]} $day$suffix, ${date.year}';
+  }
+
+  String _getDaySuffix(int day) {
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _dateController.text = _formatDate(DateTime.now());
+    _dateController.text = _formatDisplayDate(DateTime.now());
     _fetchUserData();
   }
 
@@ -70,29 +101,16 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
       _activeMonthId = monthResponse['id'];
 
-      // Check if admin
-      final profileResponse = await supabase
+      // Fetch all users
+      final usersResponse = await supabase
           .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+          .select('id, name')
+          .eq('isActive', true)
+          .order('name');
 
-      if (profileResponse['role'] == 'admin') {
-        setState(() {
-          _isAdmin = true;
-        });
-
-        // Fetch all users for admin
-        final usersResponse = await supabase
-            .from('profiles')
-            .select('id, name')
-            .eq('isActive', true)
-            .order('name');
-
-        setState(() {
-          _users = List<Map<String, dynamic>>.from(usersResponse);
-        });
-      }
+      setState(() {
+        _users = List<Map<String, dynamic>>.from(usersResponse);
+      });
     } catch (e) {
       // Silently fail
     } finally {
@@ -117,7 +135,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
+      firstDate: DateTime(2000),
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
@@ -129,7 +147,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
     if (picked != null) {
       setState(() {
-        _dateController.text = _formatDate(picked);
+        _dateController.text = _formatDisplayDate(picked);
       });
     }
   }
@@ -140,19 +158,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
       _isLoading = true;
     });
 
-    final date = _dateController.text.trim();
     final amountText = _amountController.text.trim();
     final description = _descriptionController.text.trim();
 
     // Validation
-    if (date.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please select a date';
-        _isLoading = false;
-      });
-      return;
-    }
-
     if (amountText.isEmpty) {
       setState(() {
         _errorMessage = 'Please enter amount';
@@ -165,6 +174,14 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     if (amount == null || amount <= 0) {
       setState(() {
         _errorMessage = 'Invalid amount';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    if (_selectedUserId == null) {
+      setState(() {
+        _errorMessage = 'Please select who paid';
         _isLoading = false;
       });
       return;
@@ -190,46 +207,67 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         return;
       }
 
-      // Determine who paid (added_by)
-      final addedBy = _selectedUserId ?? user.id;
+      // Parse the display date back to yyyy-MM-dd format
+      final displayText = _dateController.text;
+      DateTime selectedDate;
+      try {
+        // Extract date from "January 30th, 2026" format
+        final parts = displayText.split(' ');
+        final monthNames = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December'
+        ];
+        final monthIndex = monthNames.indexOf(parts[0]) + 1;
+        final day = int.parse(parts[1].replaceAll(RegExp(r'[^0-9]'), ''));
+        final year = int.parse(parts[2]);
+        selectedDate = DateTime(year, monthIndex, day);
+      } catch (e) {
+        selectedDate = DateTime.now();
+      }
 
-      final insertResponse = await supabase
-          .from('expenses')
-          .insert({
-            'date': date,
-            'amount': amount,
-            'category': _selectedCategory,
-            'description': description.isEmpty ? null : description,
-            'month_id': _activeMonthId,
-            'added_by': addedBy,
-          })
-          .select('id')
-          .single();
+      final dateString = _formatDate(selectedDate);
 
-      final expenseId = insertResponse['id'];
+      final insertResponse = await supabase.from('bills').insert({
+        'date': dateString,
+        'amount': amount,
+        'bill_type': _selectedBillType,
+        'description': description.isEmpty ? null : description,
+        'month_id': _activeMonthId,
+        'paid_by': _selectedUserId,
+      }).select('id').single();
+
+      final billId = insertResponse['id'];
 
       // Log the action
       try {
         String? targetUserName;
-        if (addedBy != user.id) {
-          final targetProfile = await supabase
-              .from('profiles')
-              .select('name')
-              .eq('id', addedBy)
-              .single();
-          targetUserName = targetProfile['name'];
-        }
+        final targetProfile = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('id', _selectedUserId!)
+            .single();
+        targetUserName = targetProfile['name'];
 
         await LogsApi().createLog(
           action: 'create',
-          entityType: 'expense',
-          entityId: expenseId,
+          entityType: 'bill',
+          entityId: billId,
           metadata: {
             'amount': amount,
-            'category': _selectedCategory,
+            'bill_type': _selectedBillType,
             'description': description.isEmpty ? null : description,
-            if (addedBy != user.id) 'target_user_id': addedBy,
-            if (targetUserName != null) 'target_user_name': targetUserName,
+            'paid_by': _selectedUserId,
+            if (targetUserName != null) 'paid_by_name': targetUserName,
           },
         );
       } catch (e) {
@@ -260,7 +298,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           ),
         ),
         description: Text(
-          "Expense added successfully",
+          "Bill added successfully",
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onPrimaryContainer,
           ),
@@ -270,13 +308,13 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         primaryColor: theme.colorScheme.primary,
       );
 
-      // Refresh expenses
-      context.read<ExpenseCubit>().refreshExpenses();
+      // Refresh bills
+      context.read<BillsCubit>().refreshBills();
 
       Navigator.of(context).pop();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to add expense. Please try again.';
+        _errorMessage = 'Failed to add bill. Please try again.';
         _isLoading = false;
       });
     }
@@ -370,7 +408,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Add Expense',
+              'Add New Bill',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -385,32 +423,55 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         ),
         const SizedBox(height: 20),
 
-        // Admin: User Selection (who paid)
-        if (_isAdmin && _users.isNotEmpty) ...[
-          CustomDropdown<String>(
-            label: 'Paid By (optional - defaults to yourself)',
-            value: _selectedUserId ?? '',
-            hint: 'Select who paid',
-            items: [
-              const DropdownMenuItem(
-                value: '',
-                child: Text('-- Select a user --'),
-              ),
-              ..._users.map((user) {
-                return DropdownMenuItem(
-                  value: user['id'] as String,
-                  child: Text(user['name'] as String),
-                );
-              }),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _selectedUserId = value == '' ? null : value;
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-        ],
+        // Bill Type Dropdown
+        CustomDropdown<String>(
+          label: 'Bill Type',
+          value: _selectedBillType,
+          items: _billTypes.map((billType) {
+            return DropdownMenuItem(
+              value: billType['value']!,
+              child: Text(billType['label']!),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedBillType = value!;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+
+        // Amount Field
+        CustomTextField(
+          label: 'Amount (BDT)',
+          controller: _amountController,
+        ),
+        const SizedBox(height: 16),
+
+        // Paid By Dropdown
+        CustomDropdown<String>(
+          label: 'Paid By',
+          value: _selectedUserId ?? '',
+          hint: 'Select who paid',
+          items: [
+            const DropdownMenuItem(
+              value: '',
+              child: Text('Select who paid'),
+            ),
+            ..._users.map((user) {
+              return DropdownMenuItem(
+                value: user['id'] as String,
+                child: Text(user['name'] as String),
+              );
+            }),
+          ],
+          onChanged: (value) {
+            setState(() {
+              _selectedUserId = value == '' ? null : value;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
 
         // Date Field
         GestureDetector(
@@ -425,38 +486,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         ),
         const SizedBox(height: 16),
 
-        // Amount Field
-        CustomTextField(
-          label: 'Amount',
-          controller: _amountController,
-          prefixIcon: Icons.attach_money_rounded,
-        ),
-        const SizedBox(height: 16),
-
-        // Category Dropdown
-        CustomDropdown<String>(
-          label: 'Category',
-          value: _selectedCategory,
-          prefixIcon: Icons.category_outlined,
-          items: _categories.map((category) {
-            return DropdownMenuItem(
-              value: category['value']!,
-              child: Text(category['label']!),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedCategory = value!;
-            });
-          },
-        ),
-        const SizedBox(height: 16),
-
         // Description Field
         CustomTextField(
-          label: 'Description (optional)',
+          label: 'Description (Optional)',
           controller: _descriptionController,
-          prefixIcon: Icons.notes_rounded,
         ),
 
         // Error message
@@ -514,7 +547,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               flex: 2,
               child: CustomButton(
                 size: ButtonSize.sm,
-                label: 'Add Expense',
+                label: 'Add Bill',
                 loading: _isLoading,
                 onPressed: _isLoading ? null : _handleSubmit,
               ),
