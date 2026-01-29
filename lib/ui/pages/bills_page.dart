@@ -82,15 +82,16 @@ class _BillsPageState extends State<BillsPage> {
                     final internetTotal = response.internetBills();
                     final gasTotal = response.gasBills();
 
-                    // Calculate per-person totals
+                    // Calculate per-person totals (following expenses page pattern)
                     final Map<String, double> personTotals = {};
                     final Map<String, String> personIds = {};
                     for (var bill in bills) {
                       final personName = bill.profiles['name'] as String;
-                      final personId = bill.paidBy ?? '';
+                      final personId = bill.paidBy;
                       personTotals[personName] =
                           (personTotals[personName] ?? 0) + bill.amount;
-                      if (personId.isNotEmpty) {
+                      // Only add to dropdown if there's a valid paid_by ID
+                      if (personId != null && personId.isNotEmpty) {
                         personIds[personName] = personId;
                       }
                     }
@@ -534,7 +535,7 @@ class _BillsPageState extends State<BillsPage> {
     // Apply paid by filter
     if (paidByFilter != 'All Members') {
       filteredBills = filteredBills
-          .where((bill) => bill.paidBy == paidByFilter)
+          .where((bill) => bill.paidBy != null && bill.paidBy == paidByFilter)
           .toList();
     }
 
