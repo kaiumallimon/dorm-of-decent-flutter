@@ -42,12 +42,13 @@ class _MealsPageState extends State<MealsPage> {
             CustomPageHeader(
               theme: theme,
               title: 'Meals',
+              subtitle: 'Track your meals',
               actionButton: BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, state) {
                   if (state is AuthAuthenticated) {
                     if(state.userData.role == 'admin') {
                       return CustomButton(
-                        label: 'Add Meal',
+                        label: 'Add',
                         icon: Icons.add_rounded,
                         onPressed: _showAddMealDialog,
                       );

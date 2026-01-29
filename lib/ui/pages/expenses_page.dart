@@ -41,12 +41,13 @@ class _ExpensesPageState extends State<ExpensesPage> {
             CustomPageHeader(
               theme: theme,
               title: 'Expenses',
+              subtitle: 'Track your expenses',
               actionButton: BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, state) {
                   if(state is AuthAuthenticated){
                     if (state.userData.role == 'admin') {
                       return CustomButton(
-                        label: 'Add Expense',
+                        label: 'Add',
                         icon: Icons.add_rounded,
                         onPressed: _showAddExpenseDialog,
                       );

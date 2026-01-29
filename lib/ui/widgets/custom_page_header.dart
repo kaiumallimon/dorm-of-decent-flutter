@@ -4,6 +4,7 @@ class CustomPageHeader extends StatelessWidget {
   final ThemeData theme;
   final String title;
   final Widget? actionButton;
+  final String? subtitle;
   final bool showBackButton;
 
   const CustomPageHeader({
@@ -11,12 +12,19 @@ class CustomPageHeader extends StatelessWidget {
     required this.theme,
     required this.title,
     this.actionButton,
+    this.subtitle,
     this.showBackButton = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border(
+          bottom: BorderSide(color: theme.colorScheme.onSurface.withAlpha(20)),
+        ),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Row(
         children: [
@@ -33,11 +41,26 @@ class CustomPageHeader extends StatelessWidget {
             const SizedBox(width: 16),
           ],
           Expanded(
-            child: Text(
-              title,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              spacing: 5,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Crimson Text',
+                  ),
+                ),
+                if (subtitle != null)
+                  Text(
+                    'Track your meals',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontFamily: 'Crimson Text',
+                      color: theme.colorScheme.onSurface.withAlpha(140),
+                    ),
+                  ),
+              ],
             ),
           ),
           if (actionButton != null) actionButton!,
