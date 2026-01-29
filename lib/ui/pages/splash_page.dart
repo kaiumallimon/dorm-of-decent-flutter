@@ -4,7 +4,6 @@ import 'package:dorm_of_decents/configs/constants.dart';
 import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
-import 'package:dorm_of_decents/logic/splash_cubit.dart';
 import 'package:dorm_of_decents/logic/update_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/loading_animation.dart';
 import 'package:dorm_of_decents/utils/sizing.dart';
@@ -109,7 +108,9 @@ class _SplashPageState extends State<SplashPage> {
 
                     Text(
                       AppConstants.appTitle,
-                      style: AppTheme.getTheme(context).textTheme.headlineSmall,
+                      style: AppTheme.getTheme(context).textTheme.headlineSmall?.copyWith(
+                        fontFamily: 'Crimson Text'
+                      ),
                     ),
                   ],
                 ),

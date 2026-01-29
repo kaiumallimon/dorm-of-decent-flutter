@@ -117,8 +117,9 @@ class LoginPage extends StatelessWidget {
                           const SizedBox(height: 10),
                           Text(
                             AppConstants.appTitle,
-                            style: theme.textTheme.titleLarge?.copyWith(
+                            style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w500,
+                              fontFamily: 'Crimson Text',
                             ),
                           ),
                           const SizedBox(height: 20),
