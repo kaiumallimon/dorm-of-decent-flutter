@@ -84,12 +84,12 @@ class _BillsPageState extends State<BillsPage> {
       final formattedBills = userBills.map((bill) {
         final date = bill.date;
         final formattedDate = '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}';
-        
+
         return {
           'date': formattedDate,
           'amount': bill.amount.toStringAsFixed(2),
-          'description': bill.description?.isEmpty ?? true 
-              ? '${bill.billType[0].toUpperCase()}${bill.billType.substring(1)} Bill' 
+          'description': bill.description?.isEmpty ?? true
+              ? '${bill.billType[0].toUpperCase()}${bill.billType.substring(1)} Bill'
               : bill.description!,
         };
       }).toList();
