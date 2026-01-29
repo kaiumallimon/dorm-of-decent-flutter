@@ -1,3 +1,4 @@
+import 'package:dorm_of_decents/ui/pages/dashboard_wrapper.dart';
 import 'package:flutter/material.dart';
 
 class CustomPageHeader extends StatelessWidget {
@@ -6,6 +7,7 @@ class CustomPageHeader extends StatelessWidget {
   final Widget? actionButton;
   final String? subtitle;
   final bool showBackButton;
+  final bool showMenuButton;
 
   const CustomPageHeader({
     super.key,
@@ -14,6 +16,7 @@ class CustomPageHeader extends StatelessWidget {
     this.actionButton,
     this.subtitle,
     this.showBackButton = false,
+    this.showMenuButton = false,
   });
 
   @override
@@ -27,6 +30,18 @@ class CustomPageHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Row(
         children: [
+          if (showMenuButton) ...[
+            IconButton(
+              icon: Icon(
+                Icons.menu_rounded,
+                color: theme.colorScheme.onSurface,
+              ),
+              onPressed: () => wrapperScaffoldKey.currentState?.openDrawer(),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+            const SizedBox(width: 16),
+          ],
           if (showBackButton) ...[
             IconButton(
               icon: Icon(

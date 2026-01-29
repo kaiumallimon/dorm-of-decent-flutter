@@ -164,6 +164,7 @@ class _MealsPageState extends State<MealsPage> {
               theme: theme,
               title: 'Meals',
               subtitle: 'Track your meals',
+              showMenuButton: true,
               actionButton: BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, state) {
                   if (state is AuthAuthenticated) {

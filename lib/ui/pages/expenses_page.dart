@@ -208,6 +208,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
               theme: theme,
               title: 'Expenses',
               subtitle: 'Track your expenses',
+              showMenuButton: true,
               actionButton: BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, state) {
                   if(state is AuthAuthenticated){
