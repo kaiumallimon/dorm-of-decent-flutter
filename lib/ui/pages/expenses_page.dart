@@ -1,4 +1,5 @@
 import 'package:dorm_of_decents/configs/theme.dart';
+import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/expense_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/add_expense_dialog.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_button.dart';
@@ -40,11 +41,20 @@ class _ExpensesPageState extends State<ExpensesPage> {
             CustomPageHeader(
               theme: theme,
               title: 'Expenses',
-              actionButton: CustomButton(
-                label: "Add Expense",
-                icon: Icons.add_rounded,
-                onPressed: _showAddExpenseDialog,
-                size: ButtonSize.sm,
+              actionButton: BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  if(state is AuthAuthenticated){
+                    if (state.userData.role == 'admin') {
+                      return CustomButton(
+                        label: 'Add Expense',
+                        icon: Icons.add_rounded,
+                        onPressed: _showAddExpenseDialog,
+                      );
+                    }
+                    return SizedBox.shrink();
+                  }
+                  return SizedBox.shrink();
+                }
               ),
             ),
             Expanded(

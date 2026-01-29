@@ -46,6 +46,7 @@ class DashboardApi {
       final memberCountResponse = await supabase
           .from('profiles')
           .select('*')
+          .eq('isActive', true)
           .count();
 
       // 5. Fetch user meal breakdown with profile names

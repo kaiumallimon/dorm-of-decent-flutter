@@ -36,6 +36,7 @@ class ExpenseApi {
       final profilesResponse = await supabase
           .from('profiles')
           .select('id, name')
+          .eq('isActive', true)
           .order('name');
 
       // 4. Get current user

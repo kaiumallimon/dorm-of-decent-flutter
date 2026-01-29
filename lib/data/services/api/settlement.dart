@@ -35,7 +35,7 @@ class SettlementApi {
             .from('expenses')
             .select('amount, added_by')
             .eq('month_id', monthId),
-        supabase.from('profiles').select('*'),
+        supabase.from('profiles').select('*').eq('isActive', true),
       ]);
 
       final mealsData = results[0] as List;

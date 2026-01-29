@@ -1,4 +1,6 @@
 import 'package:dorm_of_decents/configs/theme.dart';
+import 'package:dorm_of_decents/data/models/profile.dart';
+import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/meal_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/add_meal_dialog.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_button.dart';
@@ -7,6 +9,7 @@ import 'package:dorm_of_decents/ui/widgets/custom_page_header.dart';
 import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 class MealsPage extends StatefulWidget {
   const MealsPage({super.key});
@@ -39,11 +42,21 @@ class _MealsPageState extends State<MealsPage> {
             CustomPageHeader(
               theme: theme,
               title: 'Meals',
-              actionButton: CustomButton(
-                label: "Add Meal",
-                icon: Icons.add_rounded,
-                onPressed: _showAddMealDialog,
-                size: ButtonSize.sm,
+              actionButton: BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  if (state is AuthAuthenticated) {
+                    if(state.userData.role == 'admin') {
+                      return CustomButton(
+                        label: 'Add Meal',
+                        icon: Icons.add_rounded,
+                        onPressed: _showAddMealDialog,
+                      );
+                    }
+                    return SizedBox.shrink();
+                  }
+
+                  return SizedBox.shrink();
+                },
               ),
             ),
             Expanded(
