@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/data/models/profile.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
@@ -7,9 +8,11 @@ import 'package:dorm_of_decents/ui/widgets/custom_button.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_dropdown.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_page_header.dart';
 import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';
+import 'package:dorm_of_decents/utils/meal_report_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
+import 'package:toastification/toastification.dart';
 
 class MealsPage extends StatefulWidget {
   const MealsPage({super.key});
@@ -21,12 +24,130 @@ class MealsPage extends StatefulWidget {
 class _MealsPageState extends State<MealsPage> {
   String selectedMember = 'All Members';
   String selectedSort = 'Date (Newest)';
+  bool _isGeneratingReport = false;
 
   Future<void> _showAddMealDialog() async {
     await showDialog(
       context: context,
       builder: (context) => const AddMealDialog(),
     );
+  }
+
+  Future<void> _generateMealReport(String userId, String userName, double totalMeals, List<dynamic> meals) async {
+    if (_isGeneratingReport) return;
+
+    setState(() {
+      _isGeneratingReport = true;
+    });
+
+    final theme = AppTheme.getTheme(context);
+
+    try {
+      // Filter meals for this user and group by date
+      final Map<String, double> mealsByDate = {};
+
+      for (var meal in meals) {
+        if (meal.userId == userId) {
+          final dateStr = meal.date.toString().split(' ')[0]; // Get YYYY-MM-DD
+          mealsByDate[dateStr] = (mealsByDate[dateStr] ?? 0) + meal.mealCount;
+        }
+      }
+
+      // Generate the report
+      final file = await MealReportGenerator.generateMealReport(
+        userName: userName,
+        totalMeals: totalMeals,
+        mealsByDate: mealsByDate,
+        context: context,
+      );
+
+      if (file != null && mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 5),
+          icon: Icon(
+            Icons.check_circle_outline,
+            color: theme.colorScheme.primary,
+            size: 20,
+          ),
+          title: Text(
+            "Success",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          description: Text(
+            Platform.isAndroid
+                ? "Meal report saved to Downloads folder: ${file.path.split('/').last}"
+                : "Meal report saved: ${file.path}",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          type: ToastificationType.success,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.primary,
+        );
+      } else if (mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 3),
+          icon: Icon(
+            Icons.error_outline,
+            color: theme.colorScheme.error,
+            size: 20,
+          ),
+          title: Text(
+            "Error",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          description: Text(
+            "Failed to generate meal report",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          type: ToastificationType.error,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.error,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 3),
+          icon: Icon(
+            Icons.error_outline,
+            color: theme.colorScheme.error,
+            size: 20,
+          ),
+          title: Text(
+            "Error",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          description: Text(
+            "Failed to generate meal report: $e",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          type: ToastificationType.error,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.error,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGeneratingReport = false;
+        });
+      }
+    }
   }
 
   @override
@@ -171,12 +292,41 @@ class _MealsPageState extends State<MealsPage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        member.userName,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              member.userName,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.download_rounded,
+                                              color: theme.colorScheme.primary,
+                                              size: 20,
+                                            ),
+                                            onPressed: _isGeneratingReport
+                                                ? null
+                                                : () {
+                                                    _generateMealReport(
+                                                      member.userId,
+                                                      member.userName,
+                                                      member.totalMeals,
+                                                      mealResponse.meals,
+                                                    );
+                                                  },
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                            tooltip: 'Download meal report',
+                                          ),
+                                        ],
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
