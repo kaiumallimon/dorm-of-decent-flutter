@@ -258,14 +258,14 @@ class _BillsPageState extends State<BillsPage> {
 
                     // Calculate per-person totals (following expenses page pattern)
                     final Map<String, double> personTotals = {};
-                    final Map<String, String> personIds = {};
+                    final Map<String, String?> personIds = {};
                     for (var bill in bills) {
                       final personName = bill.profiles['name'] as String;
                       final personId = bill.paidBy;
                       personTotals[personName] =
                           (personTotals[personName] ?? 0) + bill.amount;
-                      // Only add to dropdown if there's a valid paid_by ID
-                      if (personId != null && personId.isNotEmpty) {
+                      // Store personId for each person (can be null)
+                      if (!personIds.containsKey(personName) || personId != null) {
                         personIds[personName] = personId;
                       }
                     }
@@ -397,7 +397,10 @@ class _BillsPageState extends State<BillsPage> {
                               runSpacing: 12,
                               children: sortedPersonTotals.map((entry) {
                                 final personName = entry.key;
+                                final personId = personIds[personName];
                                 final amount = entry.value;
+                                final isGenerating = _isGeneratingReport && _generatingForUser == personId;
+
                                 return Container(
                                   width:
                                       (MediaQuery.of(context).size.width - 60) /
@@ -415,12 +418,42 @@ class _BillsPageState extends State<BillsPage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        personName,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              personName,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                             ),
+                                          ),
+                                          IconButton(
+                                            icon: isGenerating
+                                                ? SizedBox(
+                                                    width: 20,
+                                                    height: 20,
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                                        theme.colorScheme.primary,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : Icon(
+                                                    Icons.download_rounded,
+                                                    size: 20,
+                                                    color: theme.colorScheme.primary,
+                                                  ),
+                                            onPressed: (isGenerating || personId == null)
+                                                ? null
+                                                : () => _generateBillReport(personId, personName, bills),
+                                            padding: EdgeInsets.zero,
+                                            constraints: BoxConstraints(),
+                                          ),
+                                        ],
                                       ),
                                       const SizedBox(height: 12),
                                       Row(
@@ -489,7 +522,7 @@ class _BillsPageState extends State<BillsPage> {
                                         value: 'All Members',
                                         child: Text('All Members'),
                                       ),
-                                      ...personIds.entries.map((entry) {
+                                      ...personIds.entries.where((entry) => entry.value != null && entry.value!.isNotEmpty).map((entry) {
                                         return DropdownMenuItem(
                                           value: entry.value,
                                           child: Text(entry.key),

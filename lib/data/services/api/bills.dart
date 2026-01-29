@@ -20,6 +20,7 @@ class BillsAPi {
                 amount,
                 description,
                 date,
+                paid_by,
                 created_at,
                 profiles!inner (
                     id,
