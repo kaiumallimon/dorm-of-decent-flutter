@@ -40,8 +40,9 @@ class _MonthsPageState extends State<MonthsPage> {
             CustomPageHeader(
               theme: theme,
               title: 'Months',
-              subtitle: 'Manage billing cycles and periods',
-              showMenuButton: true,
+              subtitle: 'Billing cycles and periods',
+              showMenuButton: false,
+              showBackButton: true,
             ),
             Expanded(
               child: BlocBuilder<MonthsCubit, MonthsState>(

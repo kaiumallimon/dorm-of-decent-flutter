@@ -27,10 +27,6 @@ class WrapperDrawer extends StatelessWidget {
       "path": "/dashboard/months",
     },
     {
-      "icon": Icons.file_copy,
-      "label": "Reports",
-      "path": "/dashboard/reports",
-    },{
       "icon": Icons.person_2,
       "label": "Users",
       "path": "/dashboard/users",
