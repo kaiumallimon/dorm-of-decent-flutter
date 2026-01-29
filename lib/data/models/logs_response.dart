@@ -97,7 +97,7 @@ class ActivityLog extends Equatable {
   ];
 }
 
-enum ActivityType { meal, expense, settlement }
+enum ActivityType { meal, expense, settlement, billPayment, month }
 
 extension ActivityTypeX on ActivityType {
   static ActivityType fromString(String value) {
@@ -108,6 +108,10 @@ extension ActivityTypeX on ActivityType {
         return ActivityType.expense;
       case 'settlement':
         return ActivityType.settlement;
+      case 'bill_payment':
+        return ActivityType.billPayment;
+      case 'month':
+        return ActivityType.month;
       default:
         throw ArgumentError('Unknown ActivityType: $value');
     }

@@ -166,6 +166,10 @@ String _formatAction(ActivityLog log) {
       return 'added an expense of ৳${log.amount.toStringAsFixed(2)}';
     case ActivityType.settlement:
       return 'made a settlement of ৳${log.amount.toStringAsFixed(2)}';
+    case ActivityType.billPayment:
+      return 'paid a bill of ৳${log.amount.toStringAsFixed(2)}';
+    case ActivityType.month:
+      return 'updated month to ${log.amount.toInt()}';
   }
 }
 
