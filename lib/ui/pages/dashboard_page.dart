@@ -1,5 +1,7 @@
 import 'package:dorm_of_decents/configs/theme.dart';
+import 'package:dorm_of_decents/data/models/profile.dart';
 import 'package:dorm_of_decents/logic/dashboard_cubit.dart';
+import 'package:dorm_of_decents/ui/pages/dashboard_wrapper.dart';
 import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';
 import 'package:dorm_of_decents/utils/datetime_util.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +41,7 @@ class DashboardPage extends StatelessWidget {
                   physics: BouncingScrollPhysics(),
                   slivers: [
                     SliverAppBar(
-                      expandedHeight: 90,
+                      expandedHeight: 100,
                       floating: false,
                       pinned: true,
                       elevation: 0,
@@ -56,41 +58,74 @@ class DashboardPage extends StatelessWidget {
                             titlePadding: EdgeInsets.zero,
                             title: isCollapsed
                                 ? Container(
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: theme.colorScheme.outline
+                                              .withAlpha(25),
+                                        ),
+                                      ),
+                                    ),
                                     alignment: Alignment.centerLeft,
                                     padding: const EdgeInsets.only(left: 16),
-                                    child: Text(
-                                      'Overview',
-                                      style: theme.textTheme.headlineSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            wrapperScaffoldKey.currentState
+                                                ?.openDrawer();
+                                          },
+                                          icon: Icon(Icons.menu),
+                                        ),
+                                        Text(
+                                          'Overview',
+                                          style: theme.textTheme.headlineSmall
+                                              ?.copyWith(
+                                                fontFamily: 'Crimson Text',
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                      ],
                                     ),
                                   )
                                 : null,
                             background: Padding(
-                              padding: const EdgeInsets.only(
-                                left: 24,
-                                right: 24,
-                                top: 16,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.end,
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                spacing: 10,
                                 children: [
-                                  Text(
-                                    'Welcome back, ${userName.isNotEmpty ? userName : 'Guest'}!',
-                                    style: theme.textTheme.headlineSmall
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  IconButton(
+                                    onPressed: () {
+                                      wrapperScaffoldKey.currentState
+                                          ?.openDrawer();
+                                    },
+                                    icon: Icon(Icons.menu),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "It's ${DatetimeUtil.getFormattedDateToday()}",
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.6),
-                                    ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'Welcome back, ${userName.isNotEmpty ? userName : 'Guest'}!',
+                                        style: theme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                              fontFamily: 'Crimson Text',
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "It's ${DatetimeUtil.getFormattedDateToday()}",
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme.colorScheme.onSurface
+                                                  .withAlpha(150),
+                                            ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                    ],
                                   ),
-                                  const SizedBox(height: 16),
                                 ],
                               ),
                             ),
