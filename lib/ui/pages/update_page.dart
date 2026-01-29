@@ -2,6 +2,7 @@ import 'package:dorm_of_decents/configs/colors.dart';
 import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/data/models/app_update.dart';
+import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/update_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,49 +40,68 @@ class _UpdatePageState extends State<UpdatePage> {
       },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
-        body: BlocConsumer<UpdateCubit, UpdateState>(
-          listener: (context, state) {
-            // If no update available, redirect to home
-            if (state is UpdateNotAvailable) {
-              context.go(AppRoutes.home);
-            }
-          },
-          builder: (context, state) {
-            if (state is UpdateChecking || state is UpdateInitial) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<UpdateCubit, UpdateState>(
+              listener: (context, state) {
+                // If no update available or skipped, check auth
+                if (state is UpdateNotAvailable || state is UpdateSkipped) {
+                  context.read<AuthCubit>().checkAuthStatus();
+                }
+              },
+            ),
+            BlocListener<AuthCubit, AuthState>(
+              listener: (context, state) {
+                // Only navigate if update check is complete (not available or skipped)
+                final updateState = context.read<UpdateCubit>().state;
+                if (updateState is UpdateNotAvailable || updateState is UpdateSkipped) {
+                  if (state is AuthAuthenticated) {
+                    context.go(AppRoutes.home);
+                  } else if (state is AuthUnauthenticated) {
+                    context.go(AppRoutes.login);
+                  }
+                }
+              },
+            ),
+          ],
+          child: BlocBuilder<UpdateCubit, UpdateState>(
+            builder: (context, state) {
+              if (state is UpdateChecking || state is UpdateInitial) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            if (state is UpdateError) {
-              // On error, redirect to home after a delay
-              Future.delayed(const Duration(seconds: 2), () {
-                if (mounted) context.go(AppRoutes.home);
-              });
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Failed to check for updates',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Redirecting to app...',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              );
-            }
+              if (state is UpdateError) {
+                // On error, redirect to home after a delay
+                Future.delayed(const Duration(seconds: 2), () {
+                  if (mounted) context.read<AuthCubit>().checkAuthStatus();
+                });
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Failed to check for updates',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Redirecting to app...',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-            if (state is UpdateAvailable) {
-              return _buildUpdateContent(context, theme, state.update);
-            }
+              if (state is UpdateAvailable) {
+                return _buildUpdateContent(context, theme, state.update);
+              }
 
-            return const SizedBox.shrink();
-          },
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -316,14 +336,20 @@ class _UpdatePageState extends State<UpdatePage> {
     }
 
     if (url != null && url.isNotEmpty) {
+      print('Launching update URL: $url');
       final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
+      try {
+        // Use platformDefault mode to open in browser for downloads
+        final launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+        if (!launched) {
+          throw Exception('Failed to launch URL');
+        }
+      } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open update link'),
+            SnackBar(
+              content: Text('Could not open update link: ${e.toString()}'),
+              backgroundColor: Colors.red,
             ),
           );
         }
