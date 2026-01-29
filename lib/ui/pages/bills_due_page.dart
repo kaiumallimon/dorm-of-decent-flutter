@@ -29,7 +29,8 @@ class _BillsDuePageState extends State<BillsDuePage> {
               theme: theme,
               title: 'Bills Due',
               subtitle: 'Track bill payments and who owes whom',
-              showMenuButton: true,
+              showMenuButton: false,
+              showBackButton: true,
             ),
             Expanded(
               child: BlocBuilder<BillsDueCubit, BillsDueState>(
