@@ -392,7 +392,7 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.1)),
+        border: Border.all(color: theme.colorScheme.outline.withAlpha(25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,6 +405,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   label,
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w600,
+                    fontFamily: 'Crimson Text',
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

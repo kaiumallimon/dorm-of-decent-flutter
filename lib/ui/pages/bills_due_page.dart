@@ -100,6 +100,19 @@ class _BillsDuePageState extends State<BillsDuePage> {
                                       SizedBox(
                                         width: double.infinity,
                                         child: OutlinedButton.icon(
+                                          style: ButtonStyle(
+                                            padding: MaterialStateProperty.all(
+                                              const EdgeInsets.symmetric(
+                                                vertical: 14,
+                                              ),
+                                            ),
+                                            side: MaterialStateProperty.all(
+                                              BorderSide(
+                                                color: theme.colorScheme.primary.withAlpha(100),
+                                                width: 1.5
+                                              ),
+                                            ),
+                                          ),
                                           onPressed: () async {
                                             await showDialog(
                                               context: context,
@@ -111,6 +124,7 @@ class _BillsDuePageState extends State<BillsDuePage> {
                                                   context.read<BillsDueCubit>().refreshBillsDue();
                                                 },
                                               ),
+
                                             );
                                           },
                                           icon: const Icon(Icons.handshake_outlined),
@@ -403,7 +417,7 @@ class _BillsDuePageState extends State<BillsDuePage> {
             );
           }),
           if (totalPaid > 0) ...[
-            const Divider(height: 24),
+            Divider(height: 24,color: theme.colorScheme.primary.withAlpha(75)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

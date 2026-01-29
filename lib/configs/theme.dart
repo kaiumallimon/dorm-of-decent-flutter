@@ -22,6 +22,17 @@ class AppTheme {
       backgroundColor: AppColors.lightBackground,
       foregroundColor: AppColors.lightForeground,
     ),
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      displayMedium: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      displaySmall: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      headlineLarge: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      headlineMedium: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      headlineSmall: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      titleLarge: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      titleMedium: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.w600),
+      titleSmall: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.w600),
+    ),
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -43,6 +54,17 @@ class AppTheme {
       elevation: 0,
       backgroundColor: AppColors.darkBackground,
       foregroundColor: AppColors.darkForeground,
+    ),
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      displayMedium: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      displaySmall: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      headlineLarge: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      headlineMedium: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      headlineSmall: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      titleLarge: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.bold),
+      titleMedium: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.w600),
+      titleSmall: TextStyle(fontFamily: 'Crimson Text', fontWeight: FontWeight.w600),
     ),
   );
 
