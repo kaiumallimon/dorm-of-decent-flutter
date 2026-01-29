@@ -41,7 +41,7 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
         context.go(AppRoutes.expenses);
         break;
       case 3:
-        context.go(AppRoutes.settlements);
+        context.go(AppRoutes.bills);
         break;
       // case 4:
       //   context.go(AppRoutes.account);
@@ -110,12 +110,12 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
               label: 'Expenses',
             ),
             NavigationDestination(
-              icon: Icon(Icons.account_balance_wallet_outlined),
+              icon: Icon(Icons.request_quote_outlined),
               selectedIcon: Icon(
-                Icons.account_balance_wallet,
+                Icons.request_quote,
                 color: theme.colorScheme.primary,
               ),
-              label: 'Settlements',
+              label: 'Bills',
             ),
             // NavigationDestination(
             //   icon: Icon(Icons.account_circle_outlined),

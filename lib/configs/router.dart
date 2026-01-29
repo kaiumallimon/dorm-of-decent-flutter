@@ -5,6 +5,7 @@ import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/main.dart';
 import 'package:dorm_of_decents/ui/pages/account_page.dart';
+import 'package:dorm_of_decents/ui/pages/bills_page.dart';
 import 'package:dorm_of_decents/ui/pages/dashboard_page.dart';
 import 'package:dorm_of_decents/ui/pages/dashboard_wrapper.dart';
 import 'package:dorm_of_decents/ui/pages/expenses_page.dart';
@@ -102,7 +103,12 @@ GoRouter createRouter(AuthCubit authCubit) {
           GoRoute(
             path: AppRoutes.users,
             pageBuilder: (context, state) =>
-                material3TransitionPage(child: const UsersPage()),
+                NoTransitionPage(child: const UsersPage()),
+          ),
+          GoRoute(
+            path: AppRoutes.bills,
+            pageBuilder: (context, state) =>
+                NoTransitionPage(child: const BillsPage()),
           ),
         ],
       ),

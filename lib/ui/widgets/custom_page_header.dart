@@ -20,7 +20,6 @@ class CustomPageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.transparent,
         border: Border(
           bottom: BorderSide(color: theme.colorScheme.onSurface.withAlpha(20)),
         ),
@@ -54,7 +53,7 @@ class CustomPageHeader extends StatelessWidget {
                 ),
                 if (subtitle != null)
                   Text(
-                    'Track your meals',
+                    subtitle!,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontFamily: 'Crimson Text',
                       color: theme.colorScheme.onSurface.withAlpha(140),
