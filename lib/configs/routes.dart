@@ -1,6 +1,7 @@
 class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
+  static const String update = '/update';
   static const String dashboard = '/dashboard';
 
   // Dashboard child routes

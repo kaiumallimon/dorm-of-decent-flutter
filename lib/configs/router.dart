@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:animations/animations.dart';
 import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
+import 'package:dorm_of_decents/main.dart';
 import 'package:dorm_of_decents/ui/pages/account_page.dart';
 import 'package:dorm_of_decents/ui/pages/dashboard_page.dart';
 import 'package:dorm_of_decents/ui/pages/dashboard_wrapper.dart';
@@ -12,12 +13,14 @@ import 'package:dorm_of_decents/ui/pages/logs_page.dart';
 import 'package:dorm_of_decents/ui/pages/meals_page.dart';
 import 'package:dorm_of_decents/ui/pages/settlements_page.dart';
 import 'package:dorm_of_decents/ui/pages/splash_page.dart';
+import 'package:dorm_of_decents/ui/pages/update_page.dart';
 import 'package:dorm_of_decents/ui/pages/users_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 GoRouter createRouter(AuthCubit authCubit) {
   return GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: AppRoutes.splash,
     refreshListenable: GoRouterRefreshStream(authCubit.stream),
     redirect: (context, state) {
@@ -55,6 +58,12 @@ GoRouter createRouter(AuthCubit authCubit) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginPage(),
+      ),
+
+      // Update Page
+      GoRoute(
+        path: AppRoutes.update,
+        builder: (context, state) => const UpdatePage(),
       ),
 
       // Dashboard with nested routes

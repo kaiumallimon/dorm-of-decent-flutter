@@ -5,6 +5,7 @@ import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/splash_cubit.dart';
+import 'package:dorm_of_decents/logic/update_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/loading_animation.dart';
 import 'package:dorm_of_decents/utils/sizing.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +24,8 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // Check auth status when splash screen loads
-    context.read<AuthCubit>().checkAuthStatus();
+    // Check for updates first
+    context.read<UpdateCubit>().checkForUpdate();
   }
 
   @override
@@ -49,16 +50,27 @@ class _SplashPageState extends State<SplashPage> {
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<SplashCubit, SplashState>(
+        BlocListener<UpdateCubit, UpdateState>(
           listener: (context, state) {
-            // check if splash screen has finished &
-            // navigate accordingly
-            if (state is SplashFinished) {
-              final authState = context.read<AuthCubit>().state;
-              if (authState is AuthAuthenticated) {
+            // After update check, proceed with auth check
+            if (state is UpdateAvailable) {
+              // Navigate to update page
+              context.pushReplacement(AppRoutes.update);
+            } else if (state is UpdateNotAvailable || state is UpdateError || state is UpdateSkipped) {
+              // No update needed, check auth
+              context.read<AuthCubit>().checkAuthStatus();
+            }
+          },
+        ),
+        BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            // Only navigate after update check is done
+            final updateState = context.read<UpdateCubit>().state;
+            if (updateState is UpdateNotAvailable || updateState is UpdateError || updateState is UpdateSkipped) {
+              if (state is AuthAuthenticated) {
                 // navigate to home page
                 context.pushReplacement(AppRoutes.home);
-              } else {
+              } else if (state is AuthUnauthenticated) {
                 // navigate to login
                 context.pushReplacement(AppRoutes.login);
               }

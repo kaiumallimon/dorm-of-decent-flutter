@@ -2,7 +2,6 @@ import 'package:dorm_of_decents/data/models/app_update.dart';
 import 'package:dorm_of_decents/data/services/api/update.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class UpdateState extends Equatable {
   const UpdateState();
@@ -48,6 +47,7 @@ class UpdateCubit extends Cubit<UpdateState> {
   UpdateCubit() : super(UpdateInitial());
 
   final UpdateApi _updateApi = UpdateApi();
+  String? _skippedVersionThisSession; // Only stored in memory, not persisted
 
   /// Check for app updates
   Future<void> checkForUpdate({bool showNoUpdateMessage = false}) async {
@@ -61,11 +61,8 @@ class UpdateCubit extends Cubit<UpdateState> {
         return;
       }
 
-      // Check if this version was skipped
-      final prefs = await SharedPreferences.getInstance();
-      final skippedVersion = prefs.getString('skipped_update_version');
-
-      if (skippedVersion == update.version && !update.isForceUpdate) {
+      // Check if this version was skipped in current session only
+      if (_skippedVersionThisSession == update.version && !update.isForceUpdate) {
         emit(UpdateSkipped(update));
         return;
       }
@@ -81,11 +78,11 @@ class UpdateCubit extends Cubit<UpdateState> {
     return await _updateApi.isVersionSupported();
   }
 
-  /// Skip this update (only for optional updates)
+  /// Skip this update (only for optional updates, only for current session)
   Future<void> skipUpdate(String version) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('skipped_update_version', version);
+      // Store only in memory, not persisted to storage
+      _skippedVersionThisSession = version;
 
       if (state is UpdateAvailable) {
         emit(UpdateSkipped((state as UpdateAvailable).update));
@@ -95,14 +92,9 @@ class UpdateCubit extends Cubit<UpdateState> {
     }
   }
 
-  /// Clear skipped update
+  /// Clear skipped update (for current session)
   Future<void> clearSkippedUpdate() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('skipped_update_version');
-    } catch (e) {
-      // Ignore errors
-    }
+    _skippedVersionThisSession = null;
   }
 
   /// Get download URL for update

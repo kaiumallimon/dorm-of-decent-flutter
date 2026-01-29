@@ -21,11 +21,16 @@ class UpdateDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = AppTheme.getTheme(context);
 
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Container(
+    return WillPopScope(
+      onWillPop: () async {
+        // Prevent back button if force update
+        return !update.isForceUpdate;
+      },
+      child: Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -222,7 +227,7 @@ class UpdateDialog extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      ),)
     );
   }
 

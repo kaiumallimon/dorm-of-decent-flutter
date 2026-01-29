@@ -9,11 +9,13 @@ import 'package:dorm_of_decents/logic/meal_cubit.dart';
 import 'package:dorm_of_decents/logic/settlement_cubit.dart';
 import 'package:dorm_of_decents/logic/splash_cubit.dart';
 import 'package:dorm_of_decents/logic/update_cubit.dart';
-import 'package:dorm_of_decents/ui/widgets/update_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+
+// Global navigator key for showing dialogs
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   // Ensure Flutter binding is initialized
@@ -67,15 +69,14 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => SettlementCubit()),
         BlocProvider(create: (_) => UpdateCubit()),
       ],
-      child: UpdateChecker(
-        child: MaterialApp.router(
-          title: "Dorm of Decents",
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          routerConfig: _router,
-        ),
+
+      child: MaterialApp.router(
+        title: "Dorm of Decents",
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        routerConfig: _router,
       ),
     );
   }
