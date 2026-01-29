@@ -13,6 +13,7 @@ import 'package:dorm_of_decents/ui/pages/expenses_page.dart';
 import 'package:dorm_of_decents/ui/pages/login_page.dart';
 import 'package:dorm_of_decents/ui/pages/logs_page.dart';
 import 'package:dorm_of_decents/ui/pages/meals_page.dart';
+import 'package:dorm_of_decents/ui/pages/months_page.dart';
 import 'package:dorm_of_decents/ui/pages/settlements_page.dart';
 import 'package:dorm_of_decents/ui/pages/splash_page.dart';
 import 'package:dorm_of_decents/ui/pages/update_page.dart';
@@ -125,6 +126,11 @@ GoRouter createRouter(AuthCubit authCubit) {
         path: AppRoutes.billDues,
         pageBuilder: (context, state) =>
             material3TransitionPage(child: const BillsDuePage()),
+      ),
+      GoRoute(
+        path: AppRoutes.months,
+        pageBuilder: (context, state) =>
+            material3TransitionPage(child: const MonthsPage()),
       ),
     ],
   );

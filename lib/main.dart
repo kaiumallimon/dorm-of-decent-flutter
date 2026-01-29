@@ -8,6 +8,7 @@ import 'package:dorm_of_decents/logic/dashboard_cubit.dart';
 import 'package:dorm_of_decents/logic/expense_cubit.dart';
 import 'package:dorm_of_decents/logic/login_cubit.dart';
 import 'package:dorm_of_decents/logic/meal_cubit.dart';
+  import 'package:dorm_of_decents/logic/months_cubit.dart';
 import 'package:dorm_of_decents/logic/settlement_cubit.dart';
 import 'package:dorm_of_decents/logic/splash_cubit.dart';
 import 'package:dorm_of_decents/logic/update_cubit.dart';
@@ -72,6 +73,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => UpdateCubit()),
         BlocProvider(create: (_) => BillsCubit()),
         BlocProvider(create: (_) => BillsDueCubit()),
+        BlocProvider(create: (_) => MonthsCubit()),
       ],
 
       child: MaterialApp.router(

@@ -14,5 +14,6 @@ class AppRoutes {
   static const String users = '/dashboard/users';
   static const String bills = '/dashboard/bills';
   static const String billDues = '/dashboard/bill_dues';
+  static const String months = '/dashboard/months';
 
 }

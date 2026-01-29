@@ -7,8 +7,19 @@ import 'package:dorm_of_decents/utils/datetime_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<DashboardCubit>().fetchDashboardData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,202 +28,201 @@ class DashboardPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: BlocConsumer<DashboardCubit, DashboardState>(
-          listener: (context, state) {},
+        child: BlocBuilder<DashboardCubit, DashboardState>(
           builder: (context, state) {
-            if (state is DashboardInitial) {
-              context.read<DashboardCubit>().fetchDashboardData();
-              return const MealsPageShimmer();
-            } else if (state is DashboardLoading) {
-              return const MealsPageShimmer();
-            } else if (state is DashboardError) {
-              return Center(child: Text(state.message));
-            } else if (state is DashboardEmpty) {
-              return Center(child: Text(state.message));
-            } else if (state is DashboardLoaded) {
-              final data = state.dashboardResponse;
-              final userName = state.userName;
-
-              return RefreshIndicator(
-                onRefresh: () async {
-                  await context.read<DashboardCubit>().refreshDashboardData();
-                },
-                child: CustomScrollView(
-                  physics: BouncingScrollPhysics(),
-                  slivers: [
-                    SliverAppBar(
-                      expandedHeight: 100,
-                      floating: false,
-                      pinned: true,
-                      elevation: 0,
-
-                      surfaceTintColor: Colors.transparent,
-                      backgroundColor: theme.scaffoldBackgroundColor,
-                      flexibleSpace: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final isCollapsed =
-                              constraints.maxHeight <=
-                              kToolbarHeight +
-                                  MediaQuery.of(context).padding.top;
-                          return FlexibleSpaceBar(
-                            titlePadding: EdgeInsets.zero,
-                            title: isCollapsed
-                                ? Container(
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: theme.colorScheme.outline
-                                              .withAlpha(25),
-                                        ),
-                                      ),
-                                    ),
-                                    alignment: Alignment.centerLeft,
-                                    padding: const EdgeInsets.only(left: 16),
-                                    child: Row(
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {
-                                            wrapperScaffoldKey.currentState
-                                                ?.openDrawer();
-                                          },
-                                          icon: Icon(Icons.menu),
-                                        ),
-                                        Text(
-                                          'Overview',
-                                          style: theme.textTheme.headlineSmall
-                                              ?.copyWith(
-                                                fontFamily: 'Crimson Text',
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : null,
-                            background: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Row(
-                                spacing: 10,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      wrapperScaffoldKey.currentState
-                                          ?.openDrawer();
-                                    },
-                                    icon: Icon(Icons.menu),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        'Welcome back, ${userName.isNotEmpty ? userName : 'Guest'}!',
-                                        style: theme.textTheme.headlineSmall
-                                            ?.copyWith(
-                                              fontFamily: 'Crimson Text',
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        "It's ${DatetimeUtil.getFormattedDateToday()}",
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: theme.colorScheme.onSurface
-                                                  .withAlpha(150),
-                                            ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                    ],
-                                  ),
-                                ],
+            return RefreshIndicator(
+              onRefresh: () async {
+                await context.read<DashboardCubit>().refreshDashboardData();
+              },
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+            // Static AppBar - doesn't rebuild with BLoC state changes
+            SliverAppBar(
+              expandedHeight: 100,
+              floating: false,
+              pinned: true,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              backgroundColor: theme.scaffoldBackgroundColor,
+              flexibleSpace: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isCollapsed = constraints.maxHeight <=
+                      kToolbarHeight + MediaQuery.of(context).padding.top;
+                  return FlexibleSpaceBar(
+                    titlePadding: EdgeInsets.zero,
+                    title: isCollapsed
+                        ? Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color:
+                                      theme.colorScheme.outline.withAlpha(25),
+                                ),
                               ),
                             ),
-                          );
-                        },
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    wrapperScaffoldKey.currentState
+                                        ?.openDrawer();
+                                  },
+                                  icon: const Icon(Icons.menu),
+                                ),
+                                Text(
+                                  'Overview',
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                    fontFamily: 'Crimson Text',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : null,
+                    background: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        spacing: 10,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              wrapperScaffoldKey.currentState?.openDrawer();
+                            },
+                            icon: const Icon(Icons.menu),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Welcome back!',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontFamily: 'Crimson Text',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "It's ${DatetimeUtil.getFormattedDateToday()}",
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color:
+                                      theme.colorScheme.onSurface.withAlpha(150),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 10,
-                      ),
-                      sliver: SliverList(
-                        delegate: SliverChildListDelegate([
-                          // Meal Rate Card
-                          _buildMetricCard(
-                            context,
-                            theme,
-                            'Meal Rate',
-                            'BDT ${data.mealRate.toStringAsFixed(2)}',
-                            'Per meal cost',
-                            Icons.restaurant,
-                          ),
-                          const SizedBox(height: 12),
+                  );
+                },
+              ),
+            ),
+            // Content - rebuilds with BLoC state changes
+            BlocConsumer<DashboardCubit, DashboardState>(
+              listener: (context, state) {},
+              builder: (context, state) {
+                if (state is DashboardInitial || state is DashboardLoading) {
+                  return const SliverFillRemaining(
+                    child: MealsPageShimmer(),
+                  );
+                } else if (state is DashboardError) {
+                  return SliverFillRemaining(
+                    child: Center(child: Text(state.message)),
+                  );
+                } else if (state is DashboardEmpty) {
+                  return SliverFillRemaining(
+                    child: Center(child: Text(state.message)),
+                  );
+                } else if (state is DashboardLoaded) {
+                  final data = state.dashboardResponse;
 
-                          // Total Meals Card
-                          _buildMetricCard(
-                            context,
-                            theme,
-                            'Total Meals',
-                            data.totalMeals.toStringAsFixed(1),
-                            '${data.dailyExpenseAverage.toStringAsFixed(1)} BDT/day',
-                            Icons.dinner_dining,
-                          ),
-                          const SizedBox(height: 12),
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 10,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                              // Meal Rate Card
+                              _buildMetricCard(
+                                context,
+                                theme,
+                                'Meal Rate',
+                                'BDT ${data.mealRate.toStringAsFixed(2)}',
+                                'Per meal cost',
+                                Icons.restaurant,
+                              ),
+                              const SizedBox(height: 12),
 
-                          // Total Expenses Card
-                          _buildMetricCard(
-                            context,
-                            theme,
-                            'Total Expenses',
-                            'BDT ${data.totalExpenses.toStringAsFixed(2)}',
-                            'BDT ${data.dailyExpenseAverage.toStringAsFixed(2)}/day',
-                            Icons.attach_money,
-                          ),
-                          const SizedBox(height: 12),
+                              // Total Meals Card
+                              _buildMetricCard(
+                                context,
+                                theme,
+                                'Total Meals',
+                                data.totalMeals.toStringAsFixed(1),
+                                '${data.dailyExpenseAverage.toStringAsFixed(1)} BDT/day',
+                                Icons.dinner_dining,
+                              ),
+                              const SizedBox(height: 12),
 
-                          _buildMetricCard(
-                            context,
-                            theme,
-                            'Total Bills',
-                            'BDT ${data.totalBills.toStringAsFixed(2)}',
-                            '${data.billsPaidCount} Bills paid this month',
-                            Icons.attach_money,
-                          ),
+                              // Total Expenses Card
+                              _buildMetricCard(
+                                context,
+                                theme,
+                                'Total Expenses',
+                                'BDT ${data.totalExpenses.toStringAsFixed(2)}',
+                                'BDT ${data.dailyExpenseAverage.toStringAsFixed(2)}/day',
+                                Icons.attach_money,
+                              ),
+                              const SizedBox(height: 12),
 
-                          const SizedBox(height: 12),
+                              _buildMetricCard(
+                                context,
+                                theme,
+                                'Total Bills',
+                                'BDT ${data.totalBills.toStringAsFixed(2)}',
+                                '${data.billsPaidCount} Bills paid this month',
+                                Icons.attach_money,
+                              ),
 
-                          // Weekly Trend Card
-                          _buildMetricCard(
-                            context,
-                            theme,
-                            'Weekly Trend',
-                            '${data.weeklyTrend.toStringAsFixed(1)}%',
-                            'Last 7 days vs previous',
-                            data.weeklyTrend >= 0
-                                ? Icons.trending_up
-                                : Icons.trending_down,
-                            valueColor: data.weeklyTrend >= 0
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                          const SizedBox(height: 12),
+                              const SizedBox(height: 12),
 
-                          // Days Active Card
-                          _buildMetricCard(
-                            context,
-                            theme,
-                            'Days Active',
-                            data.daysActive.toString(),
-                            '${data.memberCount} active members',
-                            Icons.calendar_today,
-                          ),
-                          const SizedBox(height: 12),
+                              // Weekly Trend Card
+                              _buildMetricCard(
+                                context,
+                                theme,
+                                'Weekly Trend',
+                                '${data.weeklyTrend.toStringAsFixed(1)}%',
+                                'Last 7 days vs previous',
+                                data.weeklyTrend >= 0
+                                    ? Icons.trending_up
+                                    : Icons.trending_down,
+                                valueColor: data.weeklyTrend >= 0
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                              const SizedBox(height: 12),
 
-                          // Avg per Person Card
-                          _buildSmallMetricCard(
+                              // Days Active Card
+                              _buildMetricCard(
+                                context,
+                                theme,
+                                'Days Active',
+                                data.daysActive.toString(),
+                                '${data.memberCount} active members',
+                                Icons.calendar_today,
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Avg per Person Card
+                              _buildSmallMetricCard(
                             context,
                             theme,
                             'Avg per Person',
@@ -255,51 +265,55 @@ class DashboardPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 24),
 
-                          // Expense Breakdown Section
-                          _buildSectionHeader(
-                            theme,
-                            'Expense Breakdown by Category',
-                          ),
-                          const SizedBox(height: 12),
-                          _buildExpenseBreakdownChart(context, theme, data),
-                          const SizedBox(height: 24),
-
-                          // Category Distribution
-                          _buildSectionHeader(theme, 'Category Distribution'),
-                          const SizedBox(height: 12),
-                          _buildCategoryDistribution(context, theme, data),
-                          const SizedBox(height: 24),
-
-                          // Top Meal Consumers
-                          _buildTopMealConsumers(context, theme, data),
-                          const SizedBox(height: 12),
-
-                          // Top Contributors
-                          _buildTopContributors(context, theme, data),
-                          const SizedBox(height: 24),
-
-                          // Recent Expenses
-                          _buildSectionHeader(theme, 'Recent Expenses'),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Latest transactions from all members',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.6,
+                              // Expense Breakdown Section
+                              _buildSectionHeader(
+                                theme,
+                                'Expense Breakdown by Category',
                               ),
-                            ),
+                              const SizedBox(height: 12),
+                              _buildExpenseBreakdownChart(context, theme, data),
+                              const SizedBox(height: 24),
+
+                              // Category Distribution
+                              _buildSectionHeader(theme, 'Category Distribution'),
+                              const SizedBox(height: 12),
+                              _buildCategoryDistribution(context, theme, data),
+                              const SizedBox(height: 24),
+
+                              // Top Meal Consumers
+                              _buildTopMealConsumers(context, theme, data),
+                              const SizedBox(height: 12),
+
+                              // Top Contributors
+                              _buildTopContributors(context, theme, data),
+                              const SizedBox(height: 24),
+
+                              // Recent Expenses
+                              _buildSectionHeader(theme, 'Recent Expenses'),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Latest transactions from all members',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(
+                                    0.6,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildRecentExpenses(context, theme, data),
+                              const SizedBox(height: 24),
+                            ]),
                           ),
-                          const SizedBox(height: 12),
-                          _buildRecentExpenses(context, theme, data),
-                          const SizedBox(height: 24),
-                        ]),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return const Center(child: Text('Unknown state'));
+                        );
+                      }
+                      return const SliverFillRemaining(
+                        child: Center(child: Text('Unknown state')),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
           },
         ),
       ),
