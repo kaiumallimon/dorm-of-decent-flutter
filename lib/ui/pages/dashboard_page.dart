@@ -122,7 +122,7 @@ class DashboardPage extends StatelessWidget {
                             theme,
                             'Total Meals',
                             data.totalMeals.toStringAsFixed(1),
-                            '${data.dailyExpenseAverage.toStringAsFixed(1)} meals/day',
+                            '${data.dailyExpenseAverage.toStringAsFixed(1)} BDT/day',
                             Icons.dinner_dining,
                           ),
                           const SizedBox(height: 12),
@@ -136,6 +136,17 @@ class DashboardPage extends StatelessWidget {
                             'BDT ${data.dailyExpenseAverage.toStringAsFixed(2)}/day',
                             Icons.attach_money,
                           ),
+                          const SizedBox(height: 12),
+
+                          _buildMetricCard(
+                            context,
+                            theme,
+                            'Total Bills',
+                            'BDT ${data.totalBills.toStringAsFixed(2)}',
+                            '${data.billsPaidCount} Bills paid this month',
+                            Icons.attach_money,
+                          ),
+
                           const SizedBox(height: 12),
 
                           // Weekly Trend Card

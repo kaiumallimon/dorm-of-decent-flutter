@@ -6,11 +6,13 @@ class DashboardResponse extends Equatable {
   final List<DashboardExpense> expenses;
   final int memberCount;
   final List<UserMealBreakdown> userMealBreakdown;
+  final List<Bill> bills;
 
   const DashboardResponse({
     required this.month,
     required this.meals,
     required this.expenses,
+    required this.bills,
     required this.memberCount,
     required this.userMealBreakdown,
   });
@@ -167,6 +169,9 @@ class DashboardResponse extends Equatable {
       expenses: (json['expenses'] as List? ?? [])
           .map((e) => DashboardExpense.fromJson(e))
           .toList(),
+      bills: (json['bills'] as List? ?? [])
+          .map((b) => Bill.fromJson(b))
+          .toList(),
       memberCount: json['memberCount'] ?? 0,
       userMealBreakdown: (json['userMealBreakdown'] as List? ?? [])
           .map((u) => UserMealBreakdown.fromJson(u))
@@ -179,16 +184,28 @@ class DashboardResponse extends Equatable {
       'month': month?.toJson(),
       'meals': meals.map((m) => m.toJson()).toList(),
       'expenses': expenses.map((e) => e.toJson()).toList(),
+      'bills': bills.map((b) => b.toJson()).toList(),
       'memberCount': memberCount,
       'userMealBreakdown': userMealBreakdown.map((u) => u.toJson()).toList(),
     };
   }
+
+  double get totalBills => bills.fold<double>(0.0, (sum, b) => sum + b.amount);
+  int get billsPaidCount => bills.length;
+  double get billsPerPerson => memberCount > 0 ? totalBills / memberCount : 0.0;
+  double get billsDistributionPercentage {
+    if (totalBills == 0 || memberCount == 0) return 0.0;
+    return (billsPerPerson / totalBills) * 100;
+  }
+
+  double get totalBillCost => totalExpenses + totalBills;
 
   @override
   List<Object?> get props => [
     month,
     meals,
     expenses,
+    bills,
     memberCount,
     userMealBreakdown,
   ];
@@ -424,5 +441,45 @@ class TopContributor {
   void addExpense(double amount) {
     totalAmount += amount;
     transactionCount++;
+  }
+}
+
+class Bill {
+  final String id;
+  final double amount;
+  final String type;
+  final DateTime date;
+  final String paidById;
+  final Map<String, dynamic> paidByProfile;
+
+  Bill({
+    required this.id,
+    required this.amount,
+    required this.type,
+    required this.date,
+    required this.paidById,
+    required this.paidByProfile,
+  });
+
+  factory Bill.fromJson(Map<String, dynamic> json) {
+    return Bill(
+      id: json['id'] ?? '',
+      amount: (json['amount'] as num).toDouble(),
+      type: json['type'] ?? '',
+      date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
+      paidById: json['paid_by_id'] ?? '',
+      paidByProfile: json['paid_by_profile'] ?? {},
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'amount': amount,
+      'type': type,
+      'date': date.toIso8601String(),
+      'paid_by_id': paidById,
+      'paid_by_profile': paidByProfile,
+    };
   }
 }

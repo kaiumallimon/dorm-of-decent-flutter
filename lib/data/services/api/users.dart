@@ -8,6 +8,7 @@ class UsersApi {
       final usersData = await supabase
           .from('profiles')
           .select('*')
+          .eq('isActive', true)
           .order('created_at', ascending: false);
 
       return (usersData as List).map((user) => Profile.fromJson(user)).toList();

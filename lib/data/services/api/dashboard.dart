@@ -21,6 +21,7 @@ class DashboardApi {
           expenses: [],
           memberCount: 0,
           userMealBreakdown: [],
+          bills: [],
         );
       }
 
@@ -53,12 +54,31 @@ class DashboardApi {
           .select('user_id, meal_count, profiles(name)')
           .eq('month_id', monthId);
 
+      /*
+        const { data: bills } = await (supabase as any)
+            .from('bills')
+            .select('id, amount, bill_type, date, paid_by, profiles!inner(name)')
+            .eq('month_id', month.id)
+            .eq('profiles.isActive', true)
+            .order('created_at', { ascending: false })
+           */
+
+      final bills = await supabase
+          .from('bills')
+          .select('id, amount, bill_type, date, paid_by, profiles!inner(name)')
+          .eq('month_id', monthId)
+          .eq('profiles.isActive', true)
+          .order('created_at', ascending: false);
+
+      print('Fetched bills: $bills');
+
       return DashboardResponse.fromJson({
         'month': monthResponse,
         'meals': mealsData,
         'expenses': expensesData,
         'memberCount': memberCountResponse.count,
         'userMealBreakdown': userMealBreakdownData,
+        'bills': bills,
       });
     } catch (e) {
       throw Exception('Failed to fetch dashboard data: ${e.toString()}');
