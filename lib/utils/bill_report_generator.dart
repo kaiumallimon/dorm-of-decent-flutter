@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:intl/intl.dart';
 
 class BillReportGenerator {
   static Future<File?> generateBillReport({
@@ -71,7 +70,6 @@ class BillReportGenerator {
 
       return file;
     } catch (e) {
-      print('Error generating bill report: $e');
       return null;
     }
   }

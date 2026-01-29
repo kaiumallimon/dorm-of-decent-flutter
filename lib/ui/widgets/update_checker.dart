@@ -1,5 +1,4 @@
 import 'package:dorm_of_decents/data/models/app_update.dart';
-import 'package:dorm_of_decents/data/models/app_update.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/update_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/update_dialog.dart';
@@ -82,7 +81,7 @@ class _UpdateCheckerState extends State<UpdateChecker>
 
     _overlayEntry = OverlayEntry(
       builder: (overlayContext) => Material(
-        color: Colors.black.withOpacity(0.5),
+        color: Colors.black.withAlpha(128),
         child: WillPopScope(
           onWillPop: () async => !update.isForceUpdate,
           child: Center(

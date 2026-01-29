@@ -1,5 +1,4 @@
 import 'package:dorm_of_decents/configs/theme.dart';
-import 'package:dorm_of_decents/data/models/profile.dart';
 import 'package:dorm_of_decents/logic/dashboard_cubit.dart';
 import 'package:dorm_of_decents/ui/pages/dashboard_wrapper.dart';
 import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';

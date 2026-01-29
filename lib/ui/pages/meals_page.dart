@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:dorm_of_decents/configs/theme.dart';
-import 'package:dorm_of_decents/data/models/profile.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/meal_cubit.dart';
 import 'package:dorm_of_decents/ui/widgets/add_meal_dialog.dart';
@@ -11,7 +10,6 @@ import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';
 import 'package:dorm_of_decents/utils/meal_report_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import 'package:toastification/toastification.dart';
 
 class MealsPage extends StatefulWidget {
