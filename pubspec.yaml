@@ -57,3 +57,9 @@ flutter:
           weight: 600
         - asset: assets/fonts/Geist-Bold.ttf
           weight: 700
+
+    - family: Crimson Text
+      fonts:
+        - asset: assets/fonts/CrimsonText-Regular.ttf
+        - asset: assets/fonts/CrimsonText-Bold.ttf
+          weight: 700
