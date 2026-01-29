@@ -5,11 +5,11 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 
-class ExpenseReportGenerator {
-  static Future<File?> generateExpenseReport({
+class BillReportGenerator {
+  static Future<File?> generateBillReport({
     required String userName,
     required double totalAmount,
-    required List<Map<String, dynamic>> expenses,
+    required List<Map<String, dynamic>> bills,
     required BuildContext context,
   }) async {
     try {
@@ -22,10 +22,10 @@ class ExpenseReportGenerator {
           top: -10000,
           child: RepaintBoundary(
             key: key,
-            child: _ExpenseReportWidget(
+            child: _BillReportWidget(
               userName: userName,
               totalAmount: totalAmount,
-              expenses: expenses,
+              bills: bills,
             ),
           ),
         ),
@@ -65,27 +65,27 @@ class ExpenseReportGenerator {
         directory = await getApplicationDocumentsDirectory();
       }
 
-      final fileName = 'expense_report_${userName.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.png';
+      final fileName = 'bill_report_${userName.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.png';
       final file = File('${directory.path}/$fileName');
       await file.writeAsBytes(pngBytes);
 
       return file;
     } catch (e) {
-      print('Error generating expense report: $e');
+      print('Error generating bill report: $e');
       return null;
     }
   }
 }
 
-class _ExpenseReportWidget extends StatelessWidget {
+class _BillReportWidget extends StatelessWidget {
   final String userName;
   final double totalAmount;
-  final List<Map<String, dynamic>> expenses;
+  final List<Map<String, dynamic>> bills;
 
-  const _ExpenseReportWidget({
+  const _BillReportWidget({
     required this.userName,
     required this.totalAmount,
-    required this.expenses,
+    required this.bills,
   });
 
   @override
@@ -107,16 +107,7 @@ class _ExpenseReportWidget extends StatelessWidget {
               fontFamily: 'Geist',
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            DateFormat('MMMM yyyy').format(DateTime.now()),
-            style: const TextStyle(
-              fontSize: 32,
-              color: Colors.black54,
-              fontFamily: 'Geist',
-            ),
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Text(
             'Total Amount Spent: BDT ${totalAmount.toStringAsFixed(2)}',
             style: const TextStyle(
@@ -128,13 +119,13 @@ class _ExpenseReportWidget extends StatelessWidget {
           const SizedBox(height: 40),
 
           // Table
-          _buildExpenseTable(),
+          _buildBillTable(),
 
           const SizedBox(height: 40),
 
           // Footer
           const Text(
-            '* This image is automatically generated through Dorm of Descent\'s application.',
+            '* This image is automatically generated through Dorm of Descent\'s website.',
             style: TextStyle(
               fontSize: 14,
               color: Colors.black54,
@@ -146,7 +137,7 @@ class _ExpenseReportWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildExpenseTable() {
+  Widget _buildBillTable() {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300, width: 1),
@@ -208,9 +199,9 @@ class _ExpenseReportWidget extends StatelessWidget {
             ),
           ),
           // Data Rows
-          ...expenses.asMap().entries.map((entry) {
+          ...bills.asMap().entries.map((entry) {
             final index = entry.key;
-            final expense = entry.value;
+            final bill = entry.value;
             return Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
               decoration: BoxDecoration(
@@ -225,7 +216,7 @@ class _ExpenseReportWidget extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      expense['date'] as String,
+                      bill['date'] as String,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black87,
@@ -236,7 +227,7 @@ class _ExpenseReportWidget extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'BDT ${expense['amount']}',
+                      'BDT ${bill['amount']}',
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black87,
@@ -248,7 +239,7 @@ class _ExpenseReportWidget extends StatelessWidget {
                   Expanded(
                     flex: 5,
                     child: Text(
-                      expense['description'] as String,
+                      bill['description'] as String,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black87,

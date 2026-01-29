@@ -24,7 +24,7 @@ class CustomPageHeader extends StatelessWidget {
           bottom: BorderSide(color: theme.colorScheme.onSurface.withAlpha(20)),
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Row(
         children: [
           if (showBackButton) ...[

@@ -18,7 +18,9 @@ class SettlementsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomPageHeader(theme: theme, title: 'Settlements'),
+            CustomPageHeader(
+              showBackButton: true,
+              theme: theme, title: 'Settlements'),
             Expanded(
               child: BlocConsumer<SettlementCubit, SettlementState>(
                 listener: (context, state) {

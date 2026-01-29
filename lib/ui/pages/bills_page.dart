@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/bills_cubit.dart';
@@ -6,9 +7,11 @@ import 'package:dorm_of_decents/ui/widgets/custom_button.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_dropdown.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_page_header.dart';
 import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';
+import 'package:dorm_of_decents/utils/bill_report_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:toastification/toastification.dart';
 
 class BillsPage extends StatefulWidget {
   const BillsPage({super.key});
@@ -21,12 +24,177 @@ class _BillsPageState extends State<BillsPage> {
   String selectedBillType = 'All Types';
   String selectedPaidBy = 'All Members';
   String selectedSort = 'Date (Newest)';
+  bool _isGeneratingReport = false;
+  String? _generatingForUser;
 
   Future<void> _showAddBillDialog() async {
     await showDialog(
       context: context,
       builder: (context) => const AddBillDialog(),
     );
+  }
+
+  Future<void> _generateBillReport(String userId, String userName, List<dynamic> allBills) async {
+    setState(() {
+      _isGeneratingReport = true;
+      _generatingForUser = userId;
+    });
+
+    final theme = AppTheme.getTheme(context);
+
+    try {
+      // Filter bills for this user
+      final userBills = allBills.where((bill) => bill.paidBy == userId).toList();
+
+      if (userBills.isEmpty) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 3),
+          icon: Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.orange,
+            size: 20,
+          ),
+          title: Text(
+            "Warning",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          description: Text(
+            "No bills found for this user",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          type: ToastificationType.warning,
+          style: ToastificationStyle.fillColored,
+          primaryColor: Colors.orange,
+        );
+        return;
+      }
+
+      // Calculate total amount
+      final totalAmount = userBills.fold<double>(
+        0.0,
+        (sum, bill) => sum + bill.amount,
+      );
+
+      // Format bills for the report
+      final formattedBills = userBills.map((bill) {
+        final date = bill.date;
+        final formattedDate = '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}';
+        
+        return {
+          'date': formattedDate,
+          'amount': bill.amount.toStringAsFixed(2),
+          'description': bill.description?.isEmpty ?? true 
+              ? '${bill.billType[0].toUpperCase()}${bill.billType.substring(1)} Bill' 
+              : bill.description!,
+        };
+      }).toList();
+
+      // Sort by date (newest first)
+      formattedBills.sort((a, b) {
+        final dateA = a['date'] as String;
+        final dateB = b['date'] as String;
+        return dateB.compareTo(dateA);
+      });
+
+      // Generate the report
+      final file = await BillReportGenerator.generateBillReport(
+        userName: userName,
+        totalAmount: totalAmount,
+        bills: formattedBills,
+        context: context,
+      );
+
+      if (file != null && mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 5),
+          icon: Icon(
+            Icons.check_circle_outline,
+            color: theme.colorScheme.primary,
+            size: 20,
+          ),
+          title: Text(
+            "Success",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          description: Text(
+            Platform.isAndroid
+                ? "Bill report saved to Downloads folder: ${file.path.split('/').last}"
+                : "Bill report saved: ${file.path}",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          type: ToastificationType.success,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.primary,
+        );
+      } else if (mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 3),
+          icon: Icon(
+            Icons.error_outline,
+            color: theme.colorScheme.error,
+            size: 20,
+          ),
+          title: Text(
+            "Error",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          description: Text(
+            "Failed to generate bill report",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          type: ToastificationType.error,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.error,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 3),
+          icon: Icon(
+            Icons.error_outline,
+            color: theme.colorScheme.error,
+            size: 20,
+          ),
+          title: Text(
+            "Error",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          description: Text(
+            e.toString(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          type: ToastificationType.error,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.error,
+        );
+      }
+    } finally {
+      setState(() {
+        _isGeneratingReport = false;
+        _generatingForUser = null;
+      });
+    }
   }
 
   @override

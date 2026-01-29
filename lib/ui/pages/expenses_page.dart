@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/logic/expense_cubit.dart';
@@ -6,8 +7,10 @@ import 'package:dorm_of_decents/ui/widgets/custom_button.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_dropdown.dart';
 import 'package:dorm_of_decents/ui/widgets/custom_page_header.dart';
 import 'package:dorm_of_decents/ui/widgets/meals_page_shimmer.dart';
+import 'package:dorm_of_decents/utils/expense_report_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:toastification/toastification.dart';
 
 class ExpensesPage extends StatefulWidget {
   const ExpensesPage({super.key});
@@ -20,12 +23,175 @@ class _ExpensesPageState extends State<ExpensesPage> {
   String selectedCategory = 'All Categories';
   String selectedPaidBy = 'All Members';
   String selectedSort = 'Date (Newest)';
+  bool _isGeneratingReport = false;
+  String? _generatingForUser;
 
   Future<void> _showAddExpenseDialog() async {
     await showDialog(
       context: context,
       builder: (context) => const AddExpenseDialog(),
     );
+  }
+
+  Future<void> _generateExpenseReport(String userId, String userName, List<dynamic> allExpenses) async {
+    setState(() {
+      _isGeneratingReport = true;
+      _generatingForUser = userId;
+    });
+
+    final theme = AppTheme.getTheme(context);
+
+    try {
+      // Filter expenses for this user
+      final userExpenses = allExpenses.where((expense) => expense.profiles.id == userId).toList();
+
+      if (userExpenses.isEmpty) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 3),
+          icon: Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.orange,
+            size: 20,
+          ),
+          title: Text(
+            "Warning",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          description: Text(
+            "No expenses found for this user",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          type: ToastificationType.warning,
+          style: ToastificationStyle.fillColored,
+          primaryColor: Colors.orange,
+        );
+        return;
+      }
+
+      // Calculate total amount
+      final totalAmount = userExpenses.fold<double>(
+        0.0,
+        (sum, expense) => sum + expense.amount,
+      );
+
+      // Format expenses for the report
+      final formattedExpenses = userExpenses.map((expense) {
+        final date = expense.date;
+        final formattedDate = '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}';
+
+        return {
+          'date': formattedDate,
+          'amount': expense.amount.toStringAsFixed(2),
+          'description': expense.description.isEmpty ? expense.category : expense.description,
+        };
+      }).toList();
+
+      // Sort by date (newest first)
+      formattedExpenses.sort((a, b) {
+        final dateA = a['date'] as String;
+        final dateB = b['date'] as String;
+        return dateB.compareTo(dateA);
+      });
+
+      // Generate the report
+      final file = await ExpenseReportGenerator.generateExpenseReport(
+        userName: userName,
+        totalAmount: totalAmount,
+        expenses: formattedExpenses,
+        context: context,
+      );
+
+      if (file != null && mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 5),
+          icon: Icon(
+            Icons.check_circle_outline,
+            color: theme.colorScheme.primary,
+            size: 20,
+          ),
+          title: Text(
+            "Success",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          description: Text(
+            Platform.isAndroid
+                ? "Expense report saved to Downloads folder: ${file.path.split('/').last}"
+                : "Expense report saved: ${file.path}",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          type: ToastificationType.success,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.primary,
+        );
+      } else if (mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 3),
+          icon: Icon(
+            Icons.error_outline,
+            color: theme.colorScheme.error,
+            size: 20,
+          ),
+          title: Text(
+            "Error",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          description: Text(
+            "Failed to generate expense report",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          type: ToastificationType.error,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.error,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        toastification.show(
+          context: context,
+          autoCloseDuration: const Duration(seconds: 3),
+          icon: Icon(
+            Icons.error_outline,
+            color: theme.colorScheme.error,
+            size: 20,
+          ),
+          title: Text(
+            "Error",
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          description: Text(
+            e.toString(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+          ),
+          type: ToastificationType.error,
+          style: ToastificationStyle.fillColored,
+          primaryColor: theme.colorScheme.error,
+        );
+      }
+    } finally {
+      setState(() {
+        _isGeneratingReport = false;
+        _generatingForUser = null;
+      });
+    }
   }
 
   @override
@@ -184,7 +350,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
                               runSpacing: 12,
                               children: sortedPersonTotals.map((entry) {
                                 final personName = entry.key;
+                                final personId = personIds[personName]!;
                                 final amount = entry.value;
+                                final isGenerating = _isGeneratingReport && _generatingForUser == personId;
                                 return Container(
                                   width:
                                       (MediaQuery.of(context).size.width - 60) /
@@ -202,12 +370,42 @@ class _ExpensesPageState extends State<ExpensesPage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        personName,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              personName,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                             ),
+                                          ),
+                                          IconButton(
+                                            icon: isGenerating
+                                                ? SizedBox(
+                                                    width: 20,
+                                                    height: 20,
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                                        theme.colorScheme.primary,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : Icon(
+                                                    Icons.download_rounded,
+                                                    size: 20,
+                                                    color: theme.colorScheme.primary,
+                                                  ),
+                                            onPressed: isGenerating
+                                                ? null
+                                                : () => _generateExpenseReport(personId, personName, expenses),
+                                            padding: EdgeInsets.zero,
+                                            constraints: BoxConstraints(),
+                                          ),
+                                        ],
                                       ),
                                       const SizedBox(height: 12),
                                       Row(
