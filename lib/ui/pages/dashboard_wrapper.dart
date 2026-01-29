@@ -24,7 +24,7 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
     if (location.startsWith(AppRoutes.meals)) return 1;
     if (location.startsWith(AppRoutes.expenses)) return 2;
     if (location.startsWith(AppRoutes.settlements)) return 3;
-    if (location.startsWith(AppRoutes.account)) return 4;
+    // if (location.startsWith(AppRoutes.account)) return 4;
 
     return 0;
   }
@@ -43,9 +43,9 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
       case 3:
         context.go(AppRoutes.settlements);
         break;
-      case 4:
-        context.go(AppRoutes.account);
-        break;
+      // case 4:
+      //   context.go(AppRoutes.account);
+      //   break;
     }
   }
 
@@ -72,52 +72,61 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
       drawer: WrapperDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(child: widget.child),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: _onDestinationSelected,
-        backgroundColor: theme.colorScheme.surface,
-        indicatorColor: theme.colorScheme.primary.withOpacity(0.15),
-        elevation: 3,
-        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: theme.colorScheme.primary),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.restaurant_outlined),
-            selectedIcon: Icon(
-              Icons.restaurant,
-              color: theme.colorScheme.primary,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: theme.colorScheme.onSurface.withAlpha(20)
+            )
+          )
+        ),
+        child: NavigationBar(
+          selectedIndex: currentIndex,
+          onDestinationSelected: _onDestinationSelected,
+          backgroundColor: theme.colorScheme.surface,
+          indicatorColor: theme.colorScheme.primary.withAlpha(50),
+          elevation: 3,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home, color: theme.colorScheme.primary),
+              label: 'Home',
             ),
-            label: 'Meals',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.payments_outlined),
-            selectedIcon: Icon(
-              Icons.payments,
-              color: theme.colorScheme.primary,
+            NavigationDestination(
+              icon: Icon(Icons.restaurant_outlined),
+              selectedIcon: Icon(
+                Icons.restaurant,
+                color: theme.colorScheme.primary,
+              ),
+              label: 'Meals',
             ),
-            label: 'Expenses',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(
-              Icons.account_balance_wallet,
-              color: theme.colorScheme.primary,
+            NavigationDestination(
+              icon: Icon(Icons.payments_outlined),
+              selectedIcon: Icon(
+                Icons.payments,
+                color: theme.colorScheme.primary,
+              ),
+              label: 'Expenses',
             ),
-            label: 'Settlements',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_circle_outlined),
-            selectedIcon: Icon(
-              Icons.account_circle,
-              color: theme.colorScheme.primary,
+            NavigationDestination(
+              icon: Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: Icon(
+                Icons.account_balance_wallet,
+                color: theme.colorScheme.primary,
+              ),
+              label: 'Settlements',
             ),
-            label: 'Account',
-          ),
-        ],
+            // NavigationDestination(
+            //   icon: Icon(Icons.account_circle_outlined),
+            //   selectedIcon: Icon(
+            //     Icons.account_circle,
+            //     color: theme.colorScheme.primary,
+            //   ),
+            //   label: 'Account',
+            // ),
+          ],
+        ),
       ),
     );
   }
