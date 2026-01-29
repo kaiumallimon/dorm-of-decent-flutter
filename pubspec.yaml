@@ -4,7 +4,7 @@ description: "A comprehensive bachelors flat management application built with
   shared living spaces."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.10.1
