@@ -23,8 +23,7 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
     if (location.startsWith(AppRoutes.home)) return 0;
     if (location.startsWith(AppRoutes.meals)) return 1;
     if (location.startsWith(AppRoutes.expenses)) return 2;
-    if (location.startsWith(AppRoutes.settlements)) return 3;
-    // if (location.startsWith(AppRoutes.account)) return 4;
+    if (location.startsWith(AppRoutes.bills)) return 3;
 
     return 0;
   }
@@ -43,9 +42,6 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
       case 3:
         context.go(AppRoutes.bills);
         break;
-      // case 4:
-      //   context.go(AppRoutes.account);
-      //   break;
     }
   }
 

@@ -71,17 +71,17 @@ class BillsResponse {
 }
 
 class UserProfile {
+  final String id;
   final String name;
-  final String role;
 
-  UserProfile({required this.name, required this.role});
+  UserProfile({required this.id, required this.name});
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(name: json['name'], role: json['role']);
+    return UserProfile(id: json['id'], name: json['name']);
   }
 
   Map<String, dynamic> toMap() {
-    return {"name": name, "role": role};
+    return {"id": id, "name": name};
   }
 }
 
@@ -104,18 +104,18 @@ class Bill {
   final String id;
   final String billType;
   final double amount;
-  final String description;
+  final String? description;
   final DateTime date;
-  final DateTime createdAt;
+  final String? paidBy;
   final Map<String, dynamic> profiles;
 
   const Bill({
     required this.id,
     required this.billType,
     required this.amount,
-    required this.description,
+    this.description,
     required this.date,
-    required this.createdAt,
+    this.paidBy,
     required this.profiles,
   });
 
@@ -123,21 +123,24 @@ class Bill {
     return Bill(
       id: json['id'],
       billType: json['bill_type'],
-      amount: json['amount'] ?? 0.0,
+      amount: (json['amount'] is int)
+          ? (json['amount'] as int).toDouble()
+          : (json['amount'] as double? ?? 0.0),
       description: json['description'],
       date: DateTime.parse(json['date']),
-      createdAt: DateTime(json['created_at']),
+      paidBy: json['paid_by'],
       profiles: Map<String, dynamic>.from(json['profiles']),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
+      "id": id,
       "bill_type": billType,
       "amount": amount,
       "description": description,
       "date": date.toIso8601String(),
-      "created_at": createdAt.toIso8601String(),
+      "paid_by": paidBy,
       "profiles": profiles,
     };
   }

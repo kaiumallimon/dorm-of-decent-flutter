@@ -2,6 +2,7 @@ import 'package:dorm_of_decents/configs/router.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
 import 'package:dorm_of_decents/data/services/client/supabase_client.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
+import 'package:dorm_of_decents/logic/bills_cubit.dart';
 import 'package:dorm_of_decents/logic/dashboard_cubit.dart';
 import 'package:dorm_of_decents/logic/expense_cubit.dart';
 import 'package:dorm_of_decents/logic/login_cubit.dart';
@@ -68,6 +69,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => ExpenseCubit()),
         BlocProvider(create: (_) => SettlementCubit()),
         BlocProvider(create: (_) => UpdateCubit()),
+        BlocProvider(create: (_) => BillsCubit()),
       ],
 
       child: MaterialApp.router(
