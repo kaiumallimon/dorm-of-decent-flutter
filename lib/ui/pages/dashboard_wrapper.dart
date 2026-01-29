@@ -1,8 +1,11 @@
 import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/configs/theme.dart';
+import 'package:dorm_of_decents/ui/widgets/wrapper_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+
+final GlobalKey<ScaffoldState> wrapperScaffoldKey = GlobalKey<ScaffoldState>();
 
 class DashboardWrapper extends StatefulWidget {
   final Widget child;
@@ -65,6 +68,8 @@ class _DashboardWrapperState extends State<DashboardWrapper> {
     );
 
     return Scaffold(
+      key: wrapperScaffoldKey,
+      drawer: WrapperDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(child: widget.child),
       bottomNavigationBar: NavigationBar(
