@@ -5,6 +5,7 @@ import 'package:dorm_of_decents/configs/routes.dart';
 import 'package:dorm_of_decents/logic/auth_cubit.dart';
 import 'package:dorm_of_decents/main.dart';
 import 'package:dorm_of_decents/ui/pages/account_page.dart';
+import 'package:dorm_of_decents/ui/pages/bills_due_page.dart';
 import 'package:dorm_of_decents/ui/pages/bills_page.dart';
 import 'package:dorm_of_decents/ui/pages/dashboard_page.dart';
 import 'package:dorm_of_decents/ui/pages/dashboard_wrapper.dart';
@@ -88,23 +89,8 @@ GoRouter createRouter(AuthCubit authCubit) {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ExpensesPage()),
           ),
-          GoRoute(
-            path: AppRoutes.settlements,
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: SettlementsPage()),
-          ),
-          GoRoute(
-            path: AppRoutes.account,
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: AccountPage()),
-          ),
 
           // Additional routes
-          GoRoute(
-            path: AppRoutes.users,
-            pageBuilder: (context, state) =>
-                NoTransitionPage(child: const UsersPage()),
-          ),
           GoRoute(
             path: AppRoutes.bills,
             pageBuilder: (context, state) =>
@@ -112,12 +98,33 @@ GoRouter createRouter(AuthCubit authCubit) {
           ),
         ],
       ),
+      GoRoute(
+        path: AppRoutes.account,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: AccountPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.users,
+        pageBuilder: (context, state) =>
+            NoTransitionPage(child: const UsersPage()),
+      ),
+
+      GoRoute(
+        path: AppRoutes.settlements,
+        pageBuilder: (context, state) =>
+            material3TransitionPage(child: SettlementsPage()),
+      ),
 
       // Standalone routes (without bottom navigation)
       GoRoute(
         path: AppRoutes.logs,
         pageBuilder: (context, state) =>
             material3TransitionPage(child: const LogsPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.billDues,
+        pageBuilder: (context, state) =>
+            material3TransitionPage(child: const BillsDuePage()),
       ),
     ],
   );
